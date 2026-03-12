@@ -4,5 +4,3 @@ openai
 python-dotenv
 pypdf
 numpy
-faiss-cpu
-sentence-transformers

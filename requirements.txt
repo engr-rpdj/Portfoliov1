@@ -2,7 +2,7 @@ fastapi
 uvicorn
 openai
 python-dotenv
-sentence-transformers
-faiss-cpu
 pypdf
 numpy
+faiss-cpu
+sentence-transformers

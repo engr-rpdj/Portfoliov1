@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>precious.dev — VS Code</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet"/>
+  <style>
+/* ============================================================
+   variables.css — Design tokens & base reset
+   ============================================================ */
+:root {
+  /* Core backgrounds */
+  --bg:           #1e1e1e;
+  --bg-sidebar:   #252526;
+  --bg-tabs:      #2d2d2d;
+  --bg-active:    #1e1e1e;
+  --bg-hover:     #2a2d2e;
+  --bg-inactive:  #2d2d2d;
+  --bg-card:      #252526;
+
+  /* Borders */
+  --border:       #3c3c3c;
+
+  /* Text */
+  --text:         #d4d4d4;
+  --text-muted:   #858585;
+  --text-dim:     #5a5a5a;
+
+  /* Syntax colours */
+  --blue:         #569cd6;
+  --green:        #4ec9b0;
+  --yellow:       #dcdcaa;
+  --orange:       #ce9178;
+  --purple:       #c586c0;
+  --red:          #f44747;
+  --teal:         #4fc1ff;
+  --comment:      #6a9955;
+  --number:       #b5cea8;
+
+  /* Chrome dimensions */
+  --titlebar-h:   30px;
+  --tabs-h:       35px;
+  --breadcrumb-h: 22px;
+  --statusbar-h:  22px;
+  --activity-w:   48px;
+  --sidebar-w:    240px;
+  --linenums-w:   48px;
+  --minimap-w:    56px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Fira Code', monospace;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+/* Thin scrollbar */
+::-webkit-scrollbar        { width: 8px; height: 8px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 4px; }
+/* ============================================================
+   chrome.css — VS Code shell: titlebar, sidebar, tabs, statusbar
+   ============================================================ */
+
+/* ── TITLEBAR ── */
+.titlebar {
+  height: var(--titlebar-h);
+  background: #323233;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-bottom: 1px solid #111;
+  user-select: none;
+  flex-shrink: 0;
+  position: relative;
+}
+.titlebar-menu { display: flex; gap: 16px; }
+.titlebar-menu span {
+  font-size: 12px; color: var(--text-muted);
+  cursor: pointer; padding: 2px 6px; border-radius: 3px;
+  transition: background .15s;
+}
+.titlebar-menu span:hover { background: rgba(255,255,255,.08); color: var(--text); }
+.titlebar-title {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  font-size: 12px; color: var(--text-muted); pointer-events: none;
+}
+.titlebar-controls { display: flex; gap: 8px; }
+.ctrl { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; }
+.ctrl.close    { background: #ff5f57; }
+.ctrl.minimize { background: #febc2e; }
+.ctrl.maximize { background: #28c840; }
+
+/* ── WORKBENCH ── */
+.workbench { display: flex; flex: 1; overflow: hidden; }
+
+/* ── ACTIVITY BAR ── */
+.activity-bar {
+  width: var(--activity-w);
+  background: #333;
+  display: flex; flex-direction: column;
+  align-items: center; padding-top: 8px; gap: 4px;
+  border-right: 1px solid #111;
+  flex-shrink: 0; z-index: 10;
+}
+.activity-icon {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-dim);
+  border-radius: 6px; transition: color .15s;
+}
+.activity-icon:hover { color: var(--text); }
+.activity-icon.active { color: var(--text); border-left: 2px solid var(--text); }
+.activity-icon svg { width: 22px; height: 22px; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden; flex-shrink: 0;
+  transition: width .2s;
+}
+.sidebar.collapsed { width: 0; overflow: hidden; }
+.sidebar-title {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .08em; color: var(--text-muted);
+  text-transform: uppercase; padding: 12px 16px 8px;
+  user-select: none;
+}
+.explorer-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 8px 4px 4px; cursor: pointer;
+  color: var(--text-muted); font-size: 11px; font-weight: 600;
+  letter-spacing: .05em; text-transform: uppercase; user-select: none;
+}
+.explorer-header:hover { color: var(--text); }
+.explorer-arrow { font-size: 10px; transition: transform .15s; display: inline-block; }
+.explorer-arrow.open { transform: rotate(90deg); }
+.file-list { padding: 2px 0; }
+.file-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 8px 3px 24px; cursor: pointer;
+  color: var(--text-muted); font-size: 12px;
+  transition: background .1s, color .1s; white-space: nowrap;
+}
+.file-item:hover { background: var(--bg-hover); color: var(--text); }
+.file-item.active { background: #094771; color: #fff; }
+.file-icon { font-size: 13px; flex-shrink: 0; }
+.file-ext { color: var(--text-dim); font-size: 11px; }
+.file-item.active .file-ext { color: #9dceff; }
+
+/* ── EDITOR AREA ── */
+.editor-area {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden; min-width: 0;
+}
+
+/* ── TAB BAR ── */
+.tab-bar {
+  height: var(--tabs-h);
+  background: var(--bg-tabs);
+  display: flex; align-items: stretch;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto; flex-shrink: 0; scrollbar-width: none;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 14px; cursor: pointer;
+  border-right: 1px solid var(--border);
+  background: var(--bg-inactive); color: var(--text-muted);
+  font-size: 12px; white-space: nowrap;
+  transition: background .1s, color .1s;
+  min-width: 110px; user-select: none;
+  font-family: 'Fira Code', monospace;
+}
+.tab:hover { background: var(--bg-hover); color: var(--text); }
+.tab.active {
+  background: var(--bg-active); color: var(--text);
+  border-top: 1px solid var(--blue); margin-top: -1px;
+}
+.tab-close {
+  margin-left: auto; opacity: 0;
+  font-size: 14px; line-height: 1;
+  padding: 0 2px; border-radius: 3px;
+}
+.tab:hover .tab-close { opacity: .5; }
+.tab-close:hover { opacity: 1 !important; background: rgba(255,255,255,.1); }
+
+/* ── BREADCRUMB ── */
+.breadcrumb {
+  height: var(--breadcrumb-h); background: var(--bg);
+  display: flex; align-items: center;
+  padding: 0 16px; border-bottom: 1px solid var(--border);
+  font-size: 11px; color: var(--text-muted);
+  gap: 6px; flex-shrink: 0;
+}
+.breadcrumb .bc-active { color: var(--text); }
+
+/* ── EDITOR CONTENT WRAPPER ── */
+.editor-content { flex: 1; display: flex; overflow: hidden; }
+
+/* ── LINE NUMBERS ── */
+.line-numbers {
+  width: var(--linenums-w); background: var(--bg);
+  color: var(--text-dim); font-size: 13px; line-height: 1.6;
+  padding: 20px 12px 20px 0; text-align: right;
+  user-select: none; overflow: hidden; flex-shrink: 0;
+  pointer-events: none;
+}
+.line-numbers div { height: 22.4px; }
+
+/* ── MINIMAP ── */
+.minimap {
+  width: var(--minimap-w); background: var(--bg);
+  opacity: .35; flex-shrink: 0;
+  border-left: 1px solid var(--border); overflow: hidden;
+  position: relative;
+}
+.mm-lines { padding: 20px 5px; display: flex; flex-direction: column; gap: 2px; }
+.mm-line { height: 2px; border-radius: 1px; background: var(--text-dim); opacity: .4; }
+.mm-line.kl { background: var(--blue);    opacity: .7; }
+.mm-line.sl { background: var(--orange);  opacity: .7; }
+.mm-line.cl { background: var(--comment); opacity: .6; }
+/* scrolling thumb indicator */
+.mm-thumb {
+  position: absolute; left: 0; right: 0;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  pointer-events: none; transition: top .1s;
+  min-height: 20px;
+}
+
+/* ── STATUS BAR ── */
+.statusbar {
+  height: var(--statusbar-h); background: #007acc;
+  display: flex; align-items: center;
+  padding: 0 12px; gap: 16px;
+  font-size: 11.5px; flex-shrink: 0; user-select: none;
+}
+.statusbar span { color: #ffffffcc; }
+.sb-right { margin-left: auto; display: flex; gap: 16px; }
+
+/* ── MOBILE HIDE ── */
+@media (max-width: 640px) {
+  .sidebar, .minimap, .titlebar-menu { display: none; }
+}
+/* ============================================================
+   syntax.css — Code syntax colours + shared section components
+   ============================================================ */
+
+/* ── CODE BLOCK BASE ── */
+.cb {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+
+/* ── SYNTAX TOKENS ── */
+.kw   { color: var(--blue); }
+.fn   { color: var(--yellow); }
+.str  { color: var(--orange); }
+.num  { color: var(--number); }
+.cm   { color: var(--comment); font-style: italic; }
+.ty   { color: var(--green); }
+.op   { color: var(--text-muted); }
+.var  { color: var(--text); }
+.prop { color: var(--teal); }
+.punc { color: var(--text-muted); }
+
+/* ── INDENT HELPERS ── */
+.i1 { display: inline-block; width: 24px; }
+.i2 { display: inline-block; width: 48px; }
+.i3 { display: inline-block; width: 72px; }
+
+/* ── SECTION COMMENT HEADER ── */
+.s-cm {
+  color: var(--comment);
+  font-size: 12.5px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── DIVIDER ── */
+.s-divider { height: 1px; background: var(--border); margin: 18px 0; }
+
+/* ── CARD ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px 20px; margin: 10px 0;
+  transition: border-color .2s, background .2s;
+}
+.card:hover { border-color: #555; background: #2a2a2b; }
+
+/* ── TAGS ── */
+.tag-grid { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.tag {
+  padding: 2px 9px; border-radius: 3px;
+  font-size: 11px; font-family: 'Fira Code', monospace;
+  border: 1px solid;
+}
+.tb { color: var(--blue);   border-color: #2a4a6b; background: #0d2035; }
+.tg { color: var(--green);  border-color: #1e4a3d; background: #0a1f1a; }
+.ty2{ color: var(--yellow); border-color: #4a4510; background: #1e1c07; }
+.to { color: var(--orange); border-color: #5a3020; background: #211007; }
+.tp { color: var(--purple); border-color: #3d2050; background: #160a1e; }
+.tt { color: var(--teal);   border-color: #1a4550; background: #081820; }
+.tr { color: var(--red);    border-color: #5a1515; background: #1e0707; }
+
+/* ── INLINE LINK ── */
+.inline-link {
+  color: var(--teal); text-decoration: none;
+  border-bottom: 1px dashed currentColor;
+}
+.inline-link:hover { color: var(--blue); }
+/* ============================================================
+   sections.css — Scrollable editor, section blocks, components
+   ============================================================ */
+
+/* ── SCROLL CONTAINER ── */
+/* This is the single scrollable div that holds ALL sections */
+.editor-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* ── SECTION BLOCKS ── */
+/* Each section is a full visual block inside the scroll area */
+.section-block {
+  padding: 36px 32px 56px 20px;
+  border-bottom: 1px solid var(--border);
+  min-height: 100vh; /* each section fills the viewport */
+}
+.section-block:last-child { border-bottom: none; min-height: auto; }
+
+/* Section label shown above each block (like an open file) */
+.section-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--text-dim);
+  font-family: 'Fira Code', monospace;
+  margin-bottom: 24px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.section-label .label-icon { font-size: 13px; }
+.section-label .label-name { color: var(--text-muted); }
+.section-label .label-name span { color: var(--text-dim); }
+
+/* ── HOME SECTION ── */
+.home-cursor {
+  display: inline-block; width: 2px; height: 1.1em;
+  background: var(--blue); margin-left: 3px;
+  animation: blink 1.1s step-end infinite;
+  vertical-align: text-bottom;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.quick-links { display: flex; gap: 9px; margin-top: 20px; flex-wrap: wrap; }
+.quick-link {
+  padding: 5px 13px; border: 1px solid var(--border);
+  border-radius: 3px; color: var(--text-muted);
+  font-size: 12px; cursor: pointer;
+  transition: all .15s; font-family: 'Fira Code', monospace;
+}
+.quick-link:hover {
+  border-color: var(--blue); color: var(--blue);
+  background: rgba(86,156,214,.07);
+}
+
+/* ── TIMELINE (Experience) ── */
+.timeline { position: relative; padding-left: 28px; margin-top: 8px; }
+.timeline::before {
+  content: ''; position: absolute;
+  left: 7px; top: 6px; bottom: 0;
+  width: 2px; background: var(--border);
+}
+.tl-item { position: relative; margin-bottom: 28px; }
+.tl-dot {
+  position: absolute; left: -25px; top: 5px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--blue); border: 2px solid var(--bg);
+}
+.tl-logo {
+  width: 36px; height: 36px; object-fit: contain;
+  border-radius: 4px; border: 1px solid var(--border);
+  margin-bottom: 8px; background: #fff; padding: 2px;
+}
+.tl-co     { color: var(--yellow); font-size: 13.5px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.tl-role   { color: var(--teal);   font-size: 12.5px; margin: 2px 0; }
+.tl-period { color: var(--text-dim); font-size: 11px; display: block; margin-bottom: 8px; }
+.tl-desc   { color: var(--text-muted); font-size: 12.5px; line-height: 1.75; margin-bottom: 10px; }
+.tl-skills {
+  display: block; overflow: hidden; white-space: nowrap;
+  color: var(--comment); font-size: 11px;
+  font-family: 'Fira Code', monospace;
+}
+.tl-skills span { display: inline-block; }
+.tl-item:hover .tl-skills span { animation: marquee 12s linear infinite; }
+@keyframes marquee { 0%{ transform: translateX(0); } 100%{ transform: translateX(-50%); } }
+
+/* ── PROJECTS ── */
+.proj-cat { margin-bottom: 36px; }
+.proj-cat-title {
+  color: var(--comment); font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.proj-cat-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.proj-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+.proj-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 4px; overflow: hidden;
+  transition: border-color .2s, transform .15s;
+}
+.proj-card:hover { border-color: var(--blue); transform: translateY(-2px); }
+.proj-card img { width: 100%; height: 120px; object-fit: cover; display: block; background: #111; }
+.proj-card-body { padding: 10px 12px; }
+.proj-card-body h4 { color: var(--yellow); font-size: 12.5px; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+.proj-card-body p  { color: var(--text-muted); font-size: 11.5px; line-height: 1.6; }
+
+/* ── COMPETITIONS (flip cards) ── */
+.comp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px; margin-top: 4px;
+}
+.flip-card { height: 220px; perspective: 1000px; cursor: pointer; }
+.flip-inner {
+  width: 100%; height: 100%;
+  transition: transform .55s;
+  transform-style: preserve-3d; position: relative;
+}
+.flip-card:hover .flip-inner { transform: rotateY(180deg); }
+.flip-front, .flip-back {
+  position: absolute; width: 100%; height: 100%;
+  backface-visibility: hidden;
+  border-radius: 4px; border: 1px solid var(--border); overflow: hidden;
+}
+.flip-front { background: var(--bg-card); }
+.flip-front img { width: 100%; height: 160px; object-fit: cover; display: block; background: #111; }
+.flip-front-title {
+  padding: 7px 10px; color: var(--yellow);
+  font-size: 11px; font-family: 'JetBrains Mono', monospace; line-height: 1.4;
+}
+.flip-back {
+  background: #0d2035; border-color: #2a4a6b;
+  transform: rotateY(180deg);
+  padding: 16px; display: flex; flex-direction: column; justify-content: center;
+}
+.flip-back h3 { color: var(--teal);   font-size: 12px; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; line-height: 1.4; }
+.flip-back h4 { color: var(--orange); font-size: 11px; margin-bottom: 10px; }
+.flip-back p  { color: var(--text-muted); font-size: 11.5px; line-height: 1.65; }
+
+/* ── SKILLS ── */
+.sk-section { margin-bottom: 22px; }
+.sk-title {
+  color: var(--comment); font-size: 11.5px; margin-bottom: 10px;
+  text-transform: uppercase; letter-spacing: .08em;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── CERTIFICATIONS ── */
+.cert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px; margin-top: 4px;
+}
+.cert-item {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 4px; overflow: hidden;
+  transition: border-color .2s, transform .15s;
+}
+.cert-item:hover { border-color: #555; transform: translateY(-2px); }
+.cert-item img { width: 100%; height: 130px; object-fit: cover; display: block; background: #111; }
+.cert-item-body { padding: 10px 12px; }
+.cert-item-body h3 { color: var(--yellow); font-size: 12px; font-family: 'JetBrains Mono', monospace; margin-bottom: 3px; line-height: 1.4; }
+.cert-item-body h4 { color: var(--teal);   font-size: 11px; margin-bottom: 6px; }
+.cert-item-body p  { color: var(--text-muted); font-size: 11px; line-height: 1.6; }
+
+/* ── CONTACT FORM ── */
+.form-group { margin-bottom: 14px; }
+.form-label {
+  color: var(--teal); font-size: 12px;
+  margin-bottom: 5px; display: block;
+  font-family: 'JetBrains Mono', monospace;
+}
+.form-input {
+  width: 100%; padding: 8px 12px;
+  background: #252526; border: 1px solid var(--border);
+  border-radius: 3px; color: var(--text);
+  font-family: 'Fira Code', monospace; font-size: 13px;
+  outline: none; transition: border-color .2s;
+}
+.form-input:focus  { border-color: var(--blue); }
+textarea.form-input { resize: vertical; min-height: 90px; }
+.btn {
+  padding: 7px 20px; background: var(--blue);
+  color: #fff; border: none; border-radius: 3px;
+  font-family: 'Fira Code', monospace; font-size: 13px;
+  cursor: pointer; transition: background .2s;
+}
+.btn:hover { background: #4a8ec2; }
+  </style>
+</head>
+<body>
+
+<!-- TITLEBAR -->
+<div class="titlebar">
+  <div class="titlebar-menu">
+    <span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Run</span><span>Terminal</span><span>Help</span>
+  </div>
+  <div class="titlebar-title">precious.dev — Visual Studio Code</div>
+  <div class="titlebar-controls">
+    <div class="ctrl minimize"></div><div class="ctrl maximize"></div><div class="ctrl close"></div>
+  </div>
+</div>
+
+<div class="workbench">
+
+  <!-- ACTIVITY BAR -->
+  <div class="activity-bar">
+    <div class="activity-icon active" onclick="toggleSidebar()" title="Explorer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7h5v5H3zM3 14h5v5H3zM10 3h11v5H10zM10 10h11v5H10zM10 17h11v5H10z"/></svg>
+    </div>
+    <div class="activity-icon" title="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+    </div>
+    <div class="activity-icon" title="Source Control">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="12" r="2"/><path d="M6 8v8M6 8c0 3 12 4 12 4"/></svg>
+    </div>
+    <div class="activity-icon" title="Extensions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="9" height="9" rx="1"/><rect x="13" y="2" width="9" height="9" rx="1"/><rect x="2" y="13" width="9" height="9" rx="1"/><path d="M13 17.5h4m-2-2v4"/></svg>
+    </div>
+    <!-- CHAT ICON — opens the AI twin panel -->
+    <div class="activity-icon" id="chatActivityIcon" title="Ask AI Twin" onclick="toggleChat()" style="margin-top:auto;margin-bottom:8px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-title">Explorer</div>
+    <div class="explorer-header" onclick="toggleFolder(this)">
+      <span class="explorer-arrow open">▶</span>PORTFOLIO
+    </div>
+    <div class="file-list" id="main-folder">
+      <div class="file-item active" data-section="home"          onclick="scrollToSection('home')">         <span class="file-icon">🏠</span>home<span class="file-ext">.tsx</span></div>
+      <div class="file-item"        data-section="about"         onclick="scrollToSection('about')">        <span class="file-icon">👤</span>about<span class="file-ext">.tsx</span></div>
+      <div class="file-item"        data-section="experience"    onclick="scrollToSection('experience')">   <span class="file-icon">💼</span>experience<span class="file-ext">.tsx</span></div>
+      <div class="file-item"        data-section="projects"      onclick="scrollToSection('projects')">     <span class="file-icon">🚀</span>projects<span class="file-ext">.tsx</span></div>
+      <div class="file-item"        data-section="competitions"  onclick="scrollToSection('competitions')"> <span class="file-icon">🏆</span>competitions<span class="file-ext">.tsx</span></div>
+      <div class="file-item"        data-section="skills"        onclick="scrollToSection('skills')">       <span class="file-icon">⚡</span>skills<span class="file-ext">.tsx</span></div>
+      <div class="file-item"        data-section="certifications"onclick="scrollToSection('certifications')"><span class="file-icon">🎓</span>certifications<span class="file-ext">.tsx</span></div>
+      <div class="file-item"        data-section="contact"       onclick="scrollToSection('contact')">      <span class="file-icon">📬</span>contact<span class="file-ext">.tsx</span></div>
+    </div>
+  </div>
+
+  <!-- EDITOR AREA -->
+  <div class="editor-area">
+    <div class="tab-bar" id="tabBar"></div>
+    <div class="breadcrumb">precious › <span class="bc-active" id="bc-file">home.tsx</span></div>
+
+    <div class="editor-content">
+
+      <!-- LINE NUMBERS (fixed, updates on scroll) -->
+      <div class="line-numbers" id="lineNumbers"></div>
+
+      <!-- ═══ SCROLLABLE CONTENT ═══ -->
+      <div class="editor-scroll" id="editorScroll">
+<!-- ============================================================
+     sections/home.html
+     Edit your name, role, passion, and quick-link labels here.
+     ============================================================ -->
+<section id="home" class="section-block cb">
+
+  <div class="section-label">
+    <span class="label-icon">🏠</span>
+    <span class="label-name">home<span>.tsx</span></span>
+  </div>
+
+  <span class="cm">// src/components/Home.tsx</span><br><br>
+  <span class="kw">export default function</span> <span class="fn">Home</span><span class="punc">() {</span><br>
+  <span class="i1"></span><span class="kw">return</span> <span class="punc">(</span><br>
+  <span class="i2"></span><span style="color:#808080">&lt;</span><span class="ty">section</span><span style="color:#808080">&gt;</span><br><br>
+
+  <span class="i3"></span><span class="kw">const</span> <span class="var">developer</span> <span class="op">=</span> <span class="punc">{</span><br>
+  <span class="i3"></span><span class="i1"></span><span class="prop">name</span><span class="op">:</span>    <span class="str">"Precious"</span><span class="punc">,</span><br>
+  <span class="i3"></span><span class="i1"></span><span class="prop">role</span><span class="op">:</span>    <span class="str">"AI Engineer &amp; Web Developer"</span><span class="punc">,</span><br>
+  <span class="i3"></span><span class="i1"></span><span class="prop">passion</span><span class="op">:</span> <span class="str">"Building intelligent systems"</span><span class="punc">,</span><br>
+  <span class="i3"></span><span class="punc">};</span><span class="home-cursor"></span><br><br>
+
+  <!-- Quick navigation links — add/remove as needed -->
+  <div class="quick-links" style="padding-left:72px; margin-bottom:16px">
+    <div class="quick-link" onclick="goTo('about')">→ about.tsx</div>
+    <div class="quick-link" onclick="goTo('experience')">→ experience.tsx</div>
+    <div class="quick-link" onclick="goTo('projects')">→ projects.tsx</div>
+    <div class="quick-link" onclick="goTo('competitions')">→ competitions.tsx</div>
+    <div class="quick-link" onclick="goTo('skills')">→ skills.tsx</div>
+    <div class="quick-link" onclick="goTo('certifications')">→ certifications.tsx</div>
+    <div class="quick-link" onclick="goTo('contact')">→ contact.tsx</div>
+  </div>
+
+  <span class="i2"></span><span style="color:#808080">&lt;/</span><span class="ty">section</span><span style="color:#808080">&gt;</span><br>
+  <span class="i1"></span><span class="punc">);</span><br>
+  <span class="punc">}</span>
+
+</section>
+<!-- ============================================================
+     sections/about.html
+     Edit your bio paragraphs and details object below.
+     ============================================================ -->
+<section id="about" class="section-block cb">
+
+  <div class="section-label">
+    <span class="label-icon">👤</span>
+    <span class="label-name">about<span>.tsx</span></span>
+  </div>
+
+  <span class="cm">// src/components/About.tsx</span><br><br>
+  <span class="kw">export default function</span> <span class="fn">About</span><span class="punc">() {</span><br>
+  <span class="i1"></span><span class="kw">return</span> <span class="punc">(</span><br><br>
+
+  <!-- ── Bio paragraphs — edit text here ── -->
+  <div style="padding-left:32px; max-width:640px; margin-bottom:20px">
+    <div style="color:var(--text); font-size:14px; line-height:1.9; margin-bottom:14px">
+      I am an <span class="ty">AI Engineer</span> and <span class="ty">Web Developer</span> passionate about
+      building machine learning systems, computer vision projects, and scalable
+      full-stack applications.
+    </div>
+    <div style="color:var(--text-muted); font-size:13.5px; line-height:1.9">
+      I specialize in <span class="str">Python</span>, <span class="str">deep learning</span>,
+      <span class="str">backend systems</span>, and modern web development.
+    </div>
+  </div>
+
+  <!-- ── Details object — edit values here ── -->
+  <div style="padding-left:32px">
+    <span class="kw">const</span> <span class="var">details</span> <span class="op">=</span> <span class="punc">{</span><br>
+    <span class="i1"></span><span class="prop">education</span><span class="op">:</span> <span class="str">"B.S. Computer Engineering — BatStateU"</span><span class="punc">,</span><br>
+    <span class="i1"></span><span class="prop">focus</span><span class="op">:</span>     <span class="punc">[</span><span class="str">"AI / ML"</span><span class="punc">,</span> <span class="str">"Computer Vision"</span><span class="punc">,</span> <span class="str">"Full Stack"</span><span class="punc">,</span> <span class="str">"Embedded Systems"</span><span class="punc">],</span><br>
+    <span class="i1"></span><span class="prop">location</span><span class="op">:</span>  <span class="str">"Philippines 🇵🇭"</span><span class="punc">,</span><br>
+    <span class="i1"></span><span class="prop">status</span><span class="op">:</span>    <span class="str">"open_to_opportunities"</span><span class="punc">,</span><br>
+    <span class="punc">};</span>
+  </div>
+
+  <br>
+  <span class="i1"></span><span class="punc">);</span><br>
+  <span class="punc">}</span>
+
+</section>
+<!-- ============================================================
+     sections/experience.html
+     To add/remove a job: copy or delete a .tl-item block.
+     Logo images go in /images/  — remove the <img> if none.
+     ============================================================ -->
+<section id="experience" class="section-block">
+
+  <div class="section-label">
+    <span class="label-icon">💼</span>
+    <span class="label-name">experience<span>.tsx</span></span>
+  </div>
+
+  <div class="s-cm cb">// src/components/Experience.tsx</div><br>
+  <div class="cb" style="margin-bottom:16px">
+    <span class="kw">export default function</span> <span class="fn">Experience</span><span class="punc">() {</span>
+  </div>
+
+  <div class="timeline">
+
+    <!-- ── JOB 1 ── -->
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <img src="/images/logodxc.jpg" alt="DXC" class="tl-logo" onerror="this.style.display='none'"/>
+      <div class="tl-co">DXC TECHNOLOGY</div>
+      <div class="tl-role">Analyst II — ERP Package Applications</div>
+      <span class="tl-period">📅 Sep 2025 – Mar 2025 · Full-time</span>
+      <div class="tl-desc">
+        Supported SAP systems by analyzing tickets, gathering requirements, and performing data migration
+        and visualization, improving system stability, data integrity, and reducing issue resolution time
+        across multiple accounts.
+      </div>
+      <div class="tag-grid">
+        <span class="tag ty2">SAP</span>
+        <span class="tag tb">SQL</span>
+        <span class="tag tt">Data Migration</span>
+        <span class="tag tg">ERP</span>
+        <span class="tag to">Business Analysis</span>
+      </div>
+      <!-- Marquee scrolls on hover — duplicate the text so it loops seamlessly -->
+      <small class="tl-skills"><span>
+        ERP System Configuration &amp; Support • Business Requirements Analysis • SQL &amp; Database Management • Data Migration • Business Process Analysis •&nbsp;&nbsp;&nbsp;
+        ERP System Configuration &amp; Support • Business Requirements Analysis • SQL &amp; Database Management • Data Migration • Business Process Analysis •
+      </span></small>
+    </div>
+
+    <!-- ── JOB 2 ── -->
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <img src="/images/logoflyhub.jpg" alt="Flyhub" class="tl-logo" onerror="this.style.display='none'"/>
+      <div class="tl-co">FLYHUB DIGITAL</div>
+      <div class="tl-role">Junior Software Engineer, QA Intern</div>
+      <span class="tl-period">📅 Jul 2025 – Sep 2025 · Internship</span>
+      <div class="tl-desc">
+        Delivered scalable web applications by developing HTML/PHP apps, managing databases, testing with
+        VS Code and Postman, and collaborating with developers, resulting in optimized performance,
+        faster testing, and reliable releases.
+      </div>
+      <div class="tag-grid">
+        <span class="tag tb">HTML</span>
+        <span class="tag tb">CSS</span>
+        <span class="tag ty2">PHP</span>
+        <span class="tag to">Postman</span>
+        <span class="tag tg">PhpMyAdmin</span>
+        <span class="tag tp">CRM</span>
+      </div>
+      <small class="tl-skills"><span>
+        HTML • CSS • PHP • Laragon • Postman API • PhpMyAdmin • VS Code • CRM •&nbsp;&nbsp;&nbsp;
+        HTML • CSS • PHP • Laragon • Postman API • PhpMyAdmin • VS Code • CRM •
+      </span></small>
+    </div>
+
+    <!-- ── JOB 3 ── -->
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <img src="/images/logobsu.jpg" alt="BatStateU" class="tl-logo" onerror="this.style.display='none'"/>
+      <div class="tl-co">BATSTATEU ACTION CENTER</div>
+      <div class="tl-role">Junior Full-Stack Developer</div>
+      <span class="tl-period">📅 Jan 2025 – Mar 2025 · Contract</span>
+      <div class="tl-desc">
+        Developed full-stack GIS applications using React, Vite, Tailwind CSS, and Leaflet, integrating
+        Google Drive API and Supabase for efficient data management and enhanced user experience.
+      </div>
+      <div class="tag-grid">
+        <span class="tag tb">React.js</span>
+        <span class="tag tt">Vite</span>
+        <span class="tag tt">Tailwind CSS</span>
+        <span class="tag tg">Leaflet</span>
+        <span class="tag to">Supabase</span>
+        <span class="tag ty2">GIS</span>
+      </div>
+      <small class="tl-skills"><span>
+        React.js • Vite • Tailwind CSS • Leaflet • Google Drive API • Supabase • GIS • Data Management •&nbsp;&nbsp;&nbsp;
+        React.js • Vite • Tailwind CSS • Leaflet • Google Drive API • Supabase • GIS • Data Management •
+      </span></small>
+    </div>
+
+    <!-- ── JOB 4 ── -->
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-co">FREELANCE PROGRAMMER</div>
+      <div class="tl-role">Python &amp; Java Developer</div>
+      <span class="tl-period">📅 Jan 2021 – Jan 2025 · Freelance</span>
+      <div class="tl-desc">
+        Developed and delivered 15+ Python and Java front-end, back-end, and full-stack GUI applications,
+        ensuring functionality, user experience, and on-time delivery.
+      </div>
+      <div class="tag-grid">
+        <span class="tag tg">Python</span>
+        <span class="tag tb">Java</span>
+        <span class="tag ty2">SQL</span>
+        <span class="tag to">XAMPP</span>
+        <span class="tag tp">GUI</span>
+      </div>
+      <small class="tl-skills"><span>
+        XAMPP • SQL • NetBeans • PyCharm • Python • Java • GUI • Full-Stack Development •&nbsp;&nbsp;&nbsp;
+        XAMPP • SQL • NetBeans • PyCharm • Python • Java • GUI • Full-Stack Development •
+      </span></small>
+    </div>
+
+    <!-- ── JOB 5 ── -->
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-co">FREELANCE UI / UX DESIGNER</div>
+      <div class="tl-role">Front-End &amp; Interface Design</div>
+      <span class="tl-period">📅 Aug 2024 – Jan 2025 · Freelance</span>
+      <div class="tl-desc">
+        Designed 3+ user-centered interfaces using Figma and Adobe XD, conducting user research and
+        testing to deliver responsive, visually appealing layouts for diverse clients.
+      </div>
+      <div class="tag-grid">
+        <span class="tag tp">Figma</span>
+        <span class="tag tb">Adobe XD</span>
+        <span class="tag tt">Canva</span>
+        <span class="tag tg">Front-End</span>
+      </div>
+      <small class="tl-skills"><span>
+        Adobe XD • Figma • Canva • Front-End Development •&nbsp;&nbsp;&nbsp;
+        Adobe XD • Figma • Canva • Front-End Development •
+      </span></small>
+    </div>
+
+  </div><!-- /timeline -->
+
+</section>
+<!-- ============================================================
+     sections/projects.html
+     Each category is a .proj-cat block.
+     Cards: swap src= with your real image/gif paths.
+     ============================================================ -->
+<section id="projects" class="section-block">
+
+  <div class="section-label">
+    <span class="label-icon">🚀</span>
+    <span class="label-name">projects<span>.tsx</span></span>
+  </div>
+
+  <div class="s-cm cb">// src/components/Projects.tsx</div><br>
+
+  <!-- ══ AI PROJECTS ══ -->
+  <div class="proj-cat">
+    <div class="proj-cat-title">// AI Projects</div>
+    <div class="proj-grid">
+
+      <div class="proj-card">
+        <img src="/gifs/codespotlightdemo.gif" alt="LLM"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🤖</text></svg>'"/>
+        <div class="proj-card-body">
+          <h4>🤖 LLM Engineering Projects</h4>
+          <p>AI scraping tools, chatbot interfaces, and automation workflows.</p>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <img src="/images/shirt.jpg" alt="Shirt Detection"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🧠</text></svg>'"/>
+        <div class="proj-card-body">
+          <h4>🧠 Shirt Size Detection</h4>
+          <p>Computer vision system using OpenCV &amp; Python.</p>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <img src="/images/ai-automation.jpg" alt="AI Automation"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🧩</text></svg>'"/>
+        <div class="proj-card-body">
+          <h4>🧩 AI Automation Tools</h4>
+          <p>LLM powered automation pipelines and API integrations.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ WEB APP PROJECTS ══ -->
+  <div class="proj-cat">
+    <div class="proj-cat-title">// Web App Projects</div>
+    <div class="proj-grid">
+
+      <div class="proj-card">
+        <img src="/imageswebapp/fp.jpg" alt="Web Apps"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🌐</text></svg>'"/>
+        <div class="proj-card-body">
+          <h4>🌐 Full Stack Web Apps</h4>
+          <p>PHP, Flask, and JavaScript applications with APIs.</p>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <img src="/imageswebapp/SecaSim.gif" alt="Dashboard"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📊</text></svg>'"/>
+        <div class="proj-card-body">
+          <h4>📊 Data Dashboards</h4>
+          <p>Interactive analytics dashboards for monitoring systems.</p>
+        </div>
+      </div>
+
+      <div class="proj-card">
+        <img src="/imageswebapp/fs.webp" alt="API Platforms"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🔗</text></svg>'"/>
+        <div class="proj-card-body">
+          <h4>🔗 API Platforms</h4>
+          <p>Backend platforms integrating external APIs.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ COMPUTER VISION ══ -->
+  <div class="proj-cat">
+    <div class="proj-cat-title">// Computer Vision Projects</div>
+    <div class="proj-grid">
+
+      <div class="proj-card"><img src="/imagescv/cvsmartbuoy.gif"  alt="CV" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>👕</text></svg>'"/><div class="proj-card-body"><h4>👕 Shirt Size Detection</h4><p>OpenCV based clothing size detection.</p></div></div>
+      <div class="proj-card"><img src="/imagescv/cvbuoyvid.gif"    alt="Track" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🛰</text></svg>'"/><div class="proj-card-body"><h4>🛰 Vision Tracking</h4><p>Object tracking using computer vision.</p></div></div>
+      <div class="proj-card"><img src="/imagescv/0307.gif"         alt="Classify" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23ce9178%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📷</text></svg>'"/><div class="proj-card-body"><h4>📷 Image Classification</h4><p>Deep learning image classifier.</p></div></div>
+      <div class="proj-card"><img src="/imagescv/cvfirevid.gif"    alt="Fire"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23f44747%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🔥</text></svg>'"/><div class="proj-card-body"><h4>🔥 Fire Detection</h4><p>Real-time fire/smoke detection system.</p></div></div>
+
+    </div>
+  </div>
+
+  <!-- ══ EMBEDDED ══ -->
+  <div class="proj-cat">
+    <div class="proj-cat-title">// Embedded Projects</div>
+    <div class="proj-grid">
+
+      <div class="proj-card"><img src="/imagesemb/sierra.jpeg" alt="Boat"   onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🚤</text></svg>'"/><div class="proj-card-body"><h4>🚤 Autonomous Boat</h4><p>Obstacle avoidance using ultrasonic sensors.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/fp.png"      alt="Water"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🌊</text></svg>'"/><div class="proj-card-body"><h4>🌊 Water Monitoring</h4><p>Turbidity sensor based water quality monitoring.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/car.jpeg"    alt="Sensor" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>⚙️</text></svg>'"/><div class="proj-card-body"><h4>⚙️ Sensor Integration</h4><p>Embedded system integrating multiple sensors.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/egg.jpeg"    alt="IoT"    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📡</text></svg>'"/><div class="proj-card-body"><h4>📡 IoT Monitoring</h4><p>Remote telemetry monitoring system.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/irrig.png"   alt="Irrig"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🌱</text></svg>'"/><div class="proj-card-body"><h4>🌱 Irrigation System</h4><p>Automated smart irrigation controller.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/fire.jpeg"   alt="Fire"   onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23f44747%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🔥</text></svg>'"/><div class="proj-card-body"><h4>🔥 Fire Sensor</h4><p>Embedded fire &amp; gas detection unit.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/canal.png"   alt="Canal"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🏞</text></svg>'"/><div class="proj-card-body"><h4>🏞 Canal Monitoring</h4><p>Remote canal water level monitoring.</p></div></div>
+
+    </div>
+  </div>
+
+  <!-- ══ CIRCUIT DIAGRAMS ══ -->
+  <div class="proj-cat">
+    <div class="proj-cat-title">// Diagrams</div>
+    <div class="proj-grid">
+
+      <div class="proj-card"><img src="/images/diagbot1.jpg"  alt="Diag1" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📐</text></svg>'"/><div class="proj-card-body"><h4>Smart Buoy Circuit</h4></div></div>
+      <div class="proj-card"><img src="/images/diagbot2.jpg"  alt="Diag2" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📐</text></svg>'"/><div class="proj-card-body"><h4>Camera Tower Circuit</h4></div></div>
+      <div class="proj-card"><img src="/images/diagbot3.jpg"  alt="Diag3" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📐</text></svg>'"/><div class="proj-card-body"><h4>Remote System Circuit</h4></div></div>
+      <div class="proj-card"><img src="/images/diagmid1.jpg"  alt="Sch1"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23ce9178%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📏</text></svg>'"/><div class="proj-card-body"><h4>Smart Buoy Schematic</h4></div></div>
+      <div class="proj-card"><img src="/images/diagmid2.jpg"  alt="Sch2"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📏</text></svg>'"/><div class="proj-card-body"><h4>Camera Tower Schematic</h4></div></div>
+      <div class="proj-card"><img src="/images/diagmid3.jpg"  alt="Sch3"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📏</text></svg>'"/><div class="proj-card-body"><h4>Remote System Schematic</h4></div></div>
+      <div class="proj-card"><img src="/images/diagtop1.webp"  alt="Top1"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📏</text></svg>'"/><div class="proj-card-body"><h4>Egg Sorting System</h4></div></div>
+      <div class="proj-card"><img src="/images/diagtop2.jpg"  alt="Top2"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📏</text></svg>'"/><div class="proj-card-body"><h4>Automated Spectral Scanner System</h4></div></div>
+
+    </div>
+  </div>
+
+  <!-- ══ 3D MODELS ══ -->
+  <div class="proj-cat">
+    <div class="proj-cat-title">// 3D Models</div>
+    <div class="proj-grid">
+
+      <div class="proj-card"><img src="/gifs/ThesisSmartBuoy.gif"       alt="Buoy"   onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🛟</text></svg>'"/><div class="proj-card-body"><h4>Thesis: Smart Buoy</h4></div></div>
+      <div class="proj-card"><img src="/gifs/ThesisCamTower.gif"        alt="Tower"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📹</text></svg>'"/><div class="proj-card-body"><h4>Thesis: Camera Tower</h4></div></div>
+      <div class="proj-card"><img src="/gifs/ThesisRemote.gif"          alt="Remote" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📡</text></svg>'"/><div class="proj-card-body"><h4>Thesis: Monitoring System</h4></div></div>
+      <div class="proj-card"><img src="/gifs/ThesisCamTowerRemote.gif"  alt="CamRem" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📷</text></svg>'"/><div class="proj-card-body"><h4>Thesis: Camera Tower Remote</h4></div></div>
+      <div class="proj-card"><img src="/gifs/ThesisModelV1.gif"         alt="V1"     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🧊</text></svg>'"/><div class="proj-card-body"><h4>Thesis Model V1.0</h4></div></div>
+      <div class="proj-card"><img src="/gifs/ThesisSmartBuoyEncloserV2.gif" alt="EncV2" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🛟</text></svg>'"/><div class="proj-card-body"><h4>Smart Buoy Encloser V2.0</h4></div></div>
+      <div class="proj-card"><img src="/gifs/ThesisSmartBuoyEncloserV1.gif" alt="EncV1" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🛟</text></svg>'"/><div class="proj-card-body"><h4>Smart Buoy Encloser V1.0</h4></div></div>
+      <div class="proj-card"><img src="/gifs/Robothon.gif"              alt="Robot"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🤖</text></svg>'"/><div class="proj-card-body"><h4>Robothon: Agrobot</h4></div></div>
+      <div class="proj-card"><img src="/gifs/FpSensorV2.gif"            alt="FP2"    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23ce9178%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🔬</text></svg>'"/><div class="proj-card-body"><h4>FP Sensor V2.0</h4></div></div>
+      <div class="proj-card"><img src="/gifs/FpSensorV1.gif"            alt="FP1"    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🔬</text></svg>'"/><div class="proj-card-body"><h4>FP Sensor V1.0</h4></div></div>
+
+    </div>
+  </div>
+
+  <!-- ══ 3D RENDERS ══ -->
+  <div class="proj-cat">
+    <div class="proj-cat-title">// 3D Renders</div>
+    <div class="proj-grid">
+
+      <div class="proj-card"><img src="/gifs/rendergif.gif"   alt="Walk"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🎬</text></svg>'"/><div class="proj-card-body"><h4>Walkthrough</h4></div></div>
+      <div class="proj-card"><img src="/images/render1.png"   alt="3D"    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🧊</text></svg>'"/><div class="proj-card-body"><h4>3D Model View</h4></div></div>
+      <div class="proj-card"><img src="/images/render4.png"   alt="Front" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>⬜</text></svg>'"/><div class="proj-card-body"><h4>Front View</h4></div></div>
+      <div class="proj-card"><img src="/images/render3.png"   alt="Side"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>◻️</text></svg>'"/><div class="proj-card-body"><h4>Side View</h4></div></div>
+      <div class="proj-card"><img src="/images/render2.png"   alt="Top"   onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23ce9178%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🔝</text></svg>'"/><div class="proj-card-body"><h4>Top View</h4></div></div>
+
+    </div>
+  </div>
+
+  
+
+</section>
+<!-- ============================================================
+     sections/competitions.html
+     Hover a card to flip it and reveal the description.
+     To add a card: copy a .flip-card block, update content.
+     ============================================================ -->
+<section id="competitions" class="section-block">
+
+  <div class="section-label">
+    <span class="label-icon">🏆</span>
+    <span class="label-name">competitions<span>.tsx</span></span>
+  </div>
+
+  <div class="s-cm cb">// src/components/Competitions.tsx — hover a card to flip</div><br>
+  <div class="cb" style="margin-bottom:16px">
+    <span class="kw">export default function</span> <span class="fn">Competitions</span><span class="punc">() {</span>
+  </div>
+
+  <div class="comp-grid">
+
+    <div class="flip-card"><div class="flip-inner">
+      <div class="flip-front">
+        <img src="/images/codespotlight.jpg" alt="DXC" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22160%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🤖</text></svg>'"/>
+        <div class="flip-front-title">DXC Techno-thon'26: Gen AI Innovation Challenge</div>
+      </div>
+      <div class="flip-back">
+        <h3>DXC Techno-thon'26: The Gen AI Innovation Challenge</h3>
+        <h4>CodeSpotlight · Candidate, 2026</h4>
+        <p>Developed an AI system that scans GitHub repositories and generates summaries for technical and non-technical users.</p>
+      </div>
+    </div></div>
+
+    <div class="flip-card"><div class="flip-inner">
+      <div class="flip-front">
+        <img src="/images/stm32.jpg" alt="STM32" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22160%22><rect fill=%22%231a0a1e%22 width=%22300%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🔩</text></svg>'"/>
+        <div class="flip-front-title">STMicroelectronics: STM32 Innovation Hackathon</div>
+      </div>
+      <div class="flip-back">
+        <h3>STMicroelectronics: STM32 Innovation Hackathon</h3>
+        <h4>Semifinalist, 2025</h4>
+        <p>Configured and programmed the STM32 microcontroller under time pressure, strengthening embedded systems and rapid problem-solving skills.</p>
+      </div>
+    </div></div>
+
+    <div class="flip-card"><div class="flip-inner">
+      <div class="flip-front">
+        <img src="/images/techtopia.jpg" alt="Techtopia" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22160%22><rect fill=%22%230a1f1a%22 width=%22300%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🌊</text></svg>'"/>
+        <div class="flip-front-title">Techtopia: An Exhibition of Innovation</div>
+      </div>
+      <div class="flip-back">
+        <h3>Techtopia: An Exhibition of Innovation</h3>
+        <h4>City-wide Aqua Network with Active Linkage · Finalist, 2024</h4>
+        <p>Designed a smart city water management prototype integrating hardware and software.</p>
+      </div>
+    </div></div>
+
+    <div class="flip-card"><div class="flip-inner">
+      <div class="flip-front">
+        <img src="/images/3dcollage.jpg" alt="Nuzlocke" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22160%22><rect fill=%22%231e1c07%22 width=%22300%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🏆</text></svg>'"/>
+        <div class="flip-front-title">Nuzlocke: 3D Collage</div>
+      </div>
+      <div class="flip-back">
+        <h3>Nuzlocke: 3D Collage</h3>
+        <h4>Champion 🥇, 2024</h4>
+        <p>Created a technically symbolic 3D collage blending creativity and engineering.</p>
+      </div>
+    </div></div>
+
+    <div class="flip-card"><div class="flip-inner">
+      <div class="flip-front">
+        <img src="/images/designsprint.jpg" alt="CpElympics" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22160%22><rect fill=%22%23211007%22 width=%22300%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23ce9178%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🌊</text></svg>'"/>
+        <div class="flip-front-title">CpElympics: Design Sprint</div>
+      </div>
+      <div class="flip-back">
+        <h3>CpElympics: Design Sprint</h3>
+        <h4>OIL AWAY! · 2nd Place 🥈, 2023</h4>
+        <p>Rapidly ideated and prototyped an oil spill cleaning and containment system.</p>
+      </div>
+    </div></div>
+
+    <div class="flip-card"><div class="flip-inner">
+      <div class="flip-front">
+        <img src="/images/robothon.jpg" alt="Robothon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22160%22><rect fill=%22%230a1f1a%22 width=%22300%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🤖</text></svg>'"/>
+        <div class="flip-front-title">ICpEP.se CpE Challenge: Robothon</div>
+      </div>
+      <div class="flip-back">
+        <h3>ICpEP.se CpE Challenge: Robothon</h3>
+        <h4>Sustainable AgroBot · Candidate, 2023</h4>
+        <p>Developed a dual-powered autonomous robot to automate irrigation and improve soil arability.</p>
+      </div>
+    </div></div>
+
+  </div><!-- /comp-grid -->
+
+</section>
+<!-- ============================================================
+     sections/skills.html
+     Add/remove <span class="tag XX"> inside each .tag-grid.
+     Tag colour classes: tb=blue tg=green ty2=yellow
+                         to=orange tp=purple tt=teal tr=red
+     ============================================================ -->
+<section id="skills" class="section-block">
+
+  <div class="section-label">
+    <span class="label-icon">⚡</span>
+    <span class="label-name">skills<span>.tsx</span></span>
+  </div>
+
+  <div class="s-cm cb">// src/components/Skills.tsx</div><br>
+  <div class="cb" style="margin-bottom:20px">
+    <span class="kw">export default function</span> <span class="fn">Skills</span><span class="punc">() {</span>
+  </div>
+
+  <!-- ── Languages ── -->
+  <div class="sk-section">
+    <div class="sk-title">// Languages</div>
+    <div class="tag-grid">
+      <span class="tag tg">Python</span>
+      <span class="tag tb">JavaScript</span>
+      <span class="tag tb">Java</span>
+      <span class="tag ty2">PHP</span>
+      <span class="tag to">C / C++</span>
+      <span class="tag ty2">SQL</span>
+      <span class="tag tt">HTML / CSS</span>
+    </div>
+  </div>
+
+  <!-- ── AI / ML ── -->
+  <div class="sk-section">
+    <div class="sk-title">// AI / Machine Learning</div>
+    <div class="tag-grid">
+      <span class="tag tg">Machine Learning</span>
+      <span class="tag tg">Deep Learning</span>
+      <span class="tag tt">OpenCV</span>
+      <span class="tag tp">TensorFlow</span>
+      <span class="tag tp">scikit-learn</span>
+      <span class="tag tb">LangChain</span>
+      <span class="tag ty2">YOLO</span>
+    </div>
+  </div>
+
+  <!-- ── Web Frameworks ── -->
+  <div class="sk-section">
+    <div class="sk-title">// Web Frameworks</div>
+    <div class="tag-grid">
+      <span class="tag tb">React.js</span>
+      <span class="tag tt">Vite</span>
+      <span class="tag tt">Tailwind CSS</span>
+      <span class="tag ty2">Flask</span>
+      <span class="tag ty2">Django</span>
+      <span class="tag to">FastAPI</span>
+      <span class="tag tp">Leaflet</span>
+    </div>
+  </div>
+
+  <!-- ── Data & Cloud ── -->
+  <div class="sk-section">
+    <div class="sk-title">// Data &amp; Cloud</div>
+    <div class="tag-grid">
+      <span class="tag to">Supabase</span>
+      <span class="tag tb">Google Drive API</span>
+      <span class="tag ty2">KNIME</span>
+      <span class="tag tt">Alteryx</span>
+      <span class="tag tg">PhpMyAdmin</span>
+      <span class="tag to">XAMPP</span>
+    </div>
+  </div>
+
+  <!-- ── Tools & DevOps ── -->
+  <div class="sk-section">
+    <div class="sk-title">// Tools &amp; DevOps</div>
+    <div class="tag-grid">
+      <span class="tag tg">Git</span>
+      <span class="tag tb">VS Code</span>
+      <span class="tag to">Postman</span>
+      <span class="tag tp">Figma</span>
+      <span class="tag tb">Adobe XD</span>
+      <span class="tag ty2">Laragon</span>
+      <span class="tag tt">NetBeans</span>
+      <span class="tag tt">PyCharm</span>
+    </div>
+  </div>
+
+  <!-- ── Embedded & Hardware ── -->
+  <div class="sk-section">
+    <div class="sk-title">// Embedded &amp; Hardware</div>
+    <div class="tag-grid">
+      <span class="tag tr">STM32</span>
+      <span class="tag to">Arduino</span>
+      <span class="tag tg">Raspberry Pi</span>
+      <span class="tag tb">ESP32</span>
+      <span class="tag ty2">Sensor Integration</span>
+      <span class="tag tt">IoT</span>
+    </div>
+  </div>
+
+</section>
+<!-- ============================================================
+     sections/certifications.html
+     Each .cert-item is one certificate card.
+     Swap src= with your real image path.
+     ============================================================ -->
+<section id="certifications" class="section-block">
+
+  <div class="section-label">
+    <span class="label-icon">🎓</span>
+    <span class="label-name">certifications<span>.tsx</span></span>
+  </div>
+
+  <div class="s-cm cb">// src/components/Certifications.tsx</div><br>
+  <div class="cb" style="margin-bottom:16px">
+    <span class="kw">export default function</span> <span class="fn">Certifications</span><span class="punc">() {</span>
+  </div>
+
+  <div class="cert-grid">
+
+    <div class="cert-item">
+      <img src="/imagescerts/aideploy.jpg" alt="GenAI" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🏅</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>DXC Techno-thon'26: Gen AI Innovation Challenge</h3>
+        <h4>CodeSpotlight · Candidate, 2026</h4>
+        <p>AI system scanning GitHub repos and generating summaries.</p>
+      </div>
+    </div>
+
+    <div class="cert-item">
+      <img src="/imagescerts/aibuilder.jpg" alt="STM32" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%231a0a1e%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🏅</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>STMicroelectronics: STM32 Innovation Hackathon</h3>
+        <h4>Semifinalist, 2025</h4>
+        <p>Embedded systems programming under time pressure.</p>
+      </div>
+    </div>
+
+    <div class="cert-item">
+      <img src="/imagescerts/aiagentic.jpg" alt="Techtopia" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230a1f1a%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🏅</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>Techtopia: An Exhibition of Innovation</h3>
+        <h4>City-wide Aqua Network · Finalist, 2024</h4>
+        <p>Smart city water management prototype.</p>
+      </div>
+    </div>
+
+    <div class="cert-item">
+      <img src="/imagescerts/aillm.jpg" alt="Nuzlocke" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%231e1c07%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🏆</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>Nuzlocke: 3D Collage</h3>
+        <h4>Champion 🥇, 2024</h4>
+        <p>Technically symbolic 3D collage blending creativity and engineering.</p>
+      </div>
+    </div>
+
+    <div class="cert-item">
+      <img src="/imagescerts/webdev.jpg" alt="CpElympics" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%23211007%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23ce9178%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🥈</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>CpElympics: Design Sprint</h3>
+        <h4>OIL AWAY! · 2nd Place, 2023</h4>
+        <p>Oil spill cleaning and containment system prototype.</p>
+      </div>
+    </div>
+
+    <div class="cert-item">
+      <img src="/imagescerts/aiengr.jpg" alt="Robothon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230a1f1a%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🤖</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>ICpEP.se CpE Challenge: Robothon</h3>
+        <h4>Sustainable AgroBot · Candidate, 2023</h4>
+        <p>Dual-powered autonomous robot for soil arability.</p>
+      </div>
+    </div>
+
+    <!-- ── Fill in titles/descriptions for remaining certs below ── -->
+
+    <div class="cert-item">
+      <img src="/imagescerts/pydata.jpg" alt="PyData" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🎓</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>PyData Certificate</h3>
+        <h4>Update with your details</h4>
+        <p>Replace with your certificate info.</p>
+      </div>
+    </div>
+
+    <div class="cert-item">
+      <img src="/imagescerts/alteryx.jpg" alt="Alteryx" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%231a0a1e%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🎓</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>Alteryx Certification</h3>
+        <h4>Update with your details</h4>
+        <p>Replace with your certificate info.</p>
+      </div>
+    </div>
+
+    <div class="cert-item">
+      <img src="/imagescerts/yellowbelt.jpg" alt="Yellow Belt" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%231e1c07%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🥋</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>Yellow Belt Certification</h3>
+        <h4>Update with your details</h4>
+        <p>Replace with your certificate info.</p>
+      </div>
+    </div>
+
+    <div class="cert-item">
+      <img src="/imagescerts/whitebelt.jpg" alt="White Belt" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%23181818%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23d4d4d4%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🥋</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>White Belt Certification</h3>
+        <h4>Update with your details</h4>
+        <p>Replace with your certificate info.</p>
+      </div>
+    </div>
+
+    <div class="cert-item">
+      <img src="/imagescerts/cisco1.jpg" alt="Cisco 1" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🌐</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>Cisco Certification 1</h3>
+        <h4>Update with your details</h4>
+        <p>Replace with your certificate info.</p>
+      </div>
+    </div>
+
+    <div class="cert-item">
+      <img src="/imagescerts/cisco2.jpg" alt="Cisco 2" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🌐</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>Cisco Certification 2</h3>
+        <h4>Update with your details</h4>
+        <p>Replace with your certificate info.</p>
+      </div>
+    </div>
+
+    <div class="cert-item">
+      <img src="/imagescerts/cisco3.jpg" alt="Cisco 3" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🌐</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>Cisco Certification 3</h3>
+        <h4>Update with your details</h4>
+        <p>Replace with your certificate info.</p>
+      </div>
+    </div>
+
+    <div class="cert-item">
+      <img src="/imagescerts/knime.png" alt="KNIME" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%231e1c07%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>📊</text></svg>'"/>
+      <div class="cert-item-body">
+        <h3>KNIME Analytics Platform</h3>
+        <h4>Update with your details</h4>
+        <p>Replace with your certificate info.</p>
+      </div>
+    </div>
+
+  </div><!-- /cert-grid -->
+
+</section>
+<!-- ============================================================
+     sections/contact.html
+     Update email, LinkedIn, and GitHub links below.
+     ============================================================ -->
+<section id="contact" class="section-block cb">
+
+  <div class="section-label">
+    <span class="label-icon">📬</span>
+    <span class="label-name">contact<span>.tsx</span></span>
+  </div>
+
+  <span class="cm">// src/components/Contact.tsx</span><br><br>
+  <span class="kw">export default function</span> <span class="fn">Contact</span><span class="punc">() {</span><br><br>
+
+  <div style="padding-left:24px; max-width:500px">
+    <div class="s-cm" style="margin-bottom:16px">// Get in touch</div>
+
+    <div class="form-group">
+      <label class="form-label"><span class="kw">const</span> name <span class="op">=</span></label>
+      <input class="form-input" type="text" placeholder='"Your Name"'/>
+    </div>
+    <div class="form-group">
+      <label class="form-label"><span class="kw">const</span> email <span class="op">=</span></label>
+      <input class="form-input" type="email" placeholder='"your@email.com"'/>
+    </div>
+    <div class="form-group">
+      <label class="form-label"><span class="kw">const</span> message <span class="op">=</span></label>
+      <textarea class="form-input" placeholder='"Hello! I would like to..."'></textarea>
+    </div>
+    <button class="btn">send<span class="punc">(</span>message<span class="punc">)</span></button>
+  </div>
+
+  <br><br>
+
+  <!-- ── Social links — update href values ── -->
+  <div style="padding-left:24px">
+    <div class="s-cm" style="margin-bottom:12px">// Or find me at</div>
+    <span class="kw">const</span> <span class="var">socials</span> <span class="op">=</span> <span class="punc">{</span><br>
+    <span class="i1"></span><span class="prop">email</span><span class="op">:</span>
+      <a class="str inline-link" href="/cdn-cgi/l/email-protection#3c4c4e595f5553494f7c59515d5550125f5351" style="color:var(--orange)">"<span class="__cf_email__" data-cfemail="a1d1d3c4c2c8ced4d2e1c4ccc0c8cd8fc2cecc">[email&#160;protected]</span>"</a><span class="punc">,</span><br>
+    <span class="i1"></span><span class="prop">linkedin</span><span class="op">:</span>
+      <a class="str inline-link" href="https://linkedin.com/in/precious" target="_blank" style="color:var(--orange)">"linkedin.com/in/precious"</a><span class="punc">,</span><br>
+    <span class="i1"></span><span class="prop">github</span><span class="op">:</span>
+      <a class="str inline-link" href="https://github.com/precious" target="_blank" style="color:var(--orange)">"github.com/precious"</a><span class="punc">,</span><br>
+    <span class="punc">};</span>
+  </div>
+
+  <br>
+  <span class="punc">}</span>
+
+</section>
+      </div><!-- /editor-scroll -->
+
+      <!-- MINIMAP -->
+      <div class="minimap">
+        <div class="mm-lines" id="minimap"></div>
+        <div class="mm-thumb" id="mmThumb"></div>
+      </div>
+
+    </div><!-- /editor-content -->
+  </div><!-- /editor-area -->
+</div><!-- /workbench -->
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <span>⎇ main</span>
+  <span>✓ 0 errors</span>
+  <span>⚠ 0 warnings</span>
+  <div class="sb-right">
+    <span id="sb-file">home.tsx</span>
+    <span>TypeScript JSX</span>
+    <span>UTF-8</span>
+    <span>Ln 1, Col 1</span>
+    <span>Spaces: 2</span>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+/* ============================================================
+   js/app.js — Navigation, scroll spy, tabs, minimap
+   ============================================================ */
+
+const SECTIONS = ['home','about','experience','projects','competitions','skills','certifications','contact'];
+const ICONS    = { home:'🏠', about:'👤', experience:'💼', projects:'🚀',
+                   competitions:'🏆', skills:'⚡', certifications:'🎓', contact:'📬' };
+
+let openTabs   = ['home'];
+let activeSection = 'home';
+let scrolling  = false; // prevents scroll-spy fighting sidebar clicks
+
+/* ─────────────────────────────────────────
+   TABS
+───────────────────────────────────────── */
+function renderTabs() {
+  const bar = document.getElementById('tabBar');
+  bar.innerHTML = '';
+  openTabs.forEach(name => {
+    const t = document.createElement('div');
+    t.className = 'tab' + (name === activeSection ? ' active' : '');
+    t.innerHTML =
+      `<span>${ICONS[name]}</span>${name}<span style="color:var(--text-dim);font-size:11px">.tsx</span>` +
+      `<span class="tab-close" onclick="closeTab(event,'${name}')">×</span>`;
+    t.onclick = () => scrollToSection(name);
+    bar.appendChild(t);
+  });
+}
+
+function closeTab(e, name) {
+  e.stopPropagation();
+  openTabs = openTabs.filter(t => t !== name);
+  if (activeSection === name && openTabs.length) {
+    scrollToSection(openTabs[openTabs.length - 1]);
+  } else {
+    renderTabs();
+  }
+}
+
+/* ─────────────────────────────────────────
+   SCROLL TO SECTION
+   Used by sidebar clicks, tab clicks, quick-links
+───────────────────────────────────────── */
+//function scrollTo(id) { scrollToSection(id); } // alias for inline onclick
+function goTo(id) { scrollToSection(id); }
+
+function scrollToSection(id) {
+  if (!SECTIONS.includes(id)) return;
+  scrolling = true;
+
+  const el = document.getElementById(id);
+  const container = document.getElementById('editorScroll');
+  if (el && container) {
+    container.scrollTo({ top: el.offsetTop, behavior: 'smooth' });
+  }
+
+  setActive(id);
+
+  // Re-enable scroll-spy after animation settles
+  setTimeout(() => { scrolling = false; }, 800);
+}
+
+/* ─────────────────────────────────────────
+   SET ACTIVE STATE (sidebar + tabs + breadcrumb)
+───────────────────────────────────────── */
+function setActive(id) {
+  activeSection = id;
+
+  // Sidebar
+  document.querySelectorAll('.file-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.section === id);
+  });
+
+  // Tabs — open if not already
+  if (!openTabs.includes(id)) openTabs.push(id);
+  renderTabs();
+
+  // Breadcrumb + status bar
+  document.getElementById('bc-file').textContent = id + '.tsx';
+  document.getElementById('sb-file').textContent = id + '.tsx';
+}
+
+/* ─────────────────────────────────────────
+   SCROLL SPY
+   Watches which section is most visible and
+   updates sidebar/tabs without blocking scroll
+───────────────────────────────────────── */
+function initScrollSpy() {
+  const container = document.getElementById('editorScroll');
+
+  container.addEventListener('scroll', () => {
+    updateLineNumbers();
+    updateMinimapThumb();
+
+    if (scrolling) return; // don't fight programmatic scrolls
+
+    let closest = null;
+    let closestDist = Infinity;
+
+    SECTIONS.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const dist = Math.abs(el.getBoundingClientRect().top - 80);
+      if (dist < closestDist) { closestDist = dist; closest = id; }
+    });
+
+    if (closest && closest !== activeSection) {
+      setActive(closest);
+    }
+  }, { passive: true });
+}
+
+/* ─────────────────────────────────────────
+   LINE NUMBERS — reacts to scroll position
+───────────────────────────────────────── */
+function updateLineNumbers() {
+  const container = document.getElementById('editorScroll');
+  const lineH = 22.4;
+  const startLine = Math.floor(container.scrollTop / lineH) + 1;
+  const visibleLines = Math.ceil(container.clientHeight / lineH) + 5;
+  const ln = document.getElementById('lineNumbers');
+  ln.innerHTML = '';
+  for (let i = 0; i < visibleLines; i++) {
+    const d = document.createElement('div');
+    d.textContent = startLine + i;
+    ln.appendChild(d);
+  }
+}
+
+/* ─────────────────────────────────────────
+   MINIMAP GENERATION + THUMB
+───────────────────────────────────────── */
+function generateMinimap() {
+  const types = ['', 'kl', 'sl', 'cl'];
+  document.getElementById('minimap').innerHTML =
+    Array.from({ length: 180 }, () => {
+      const t = types[Math.floor(Math.random() * 4)];
+      const w = 15 + Math.random() * 75;
+      return `<div class="mm-line ${t}" style="width:${w}%"></div>`;
+    }).join('');
+}
+
+function updateMinimapThumb() {
+  const container = document.getElementById('editorScroll');
+  const thumb = document.getElementById('mmThumb');
+  if (!thumb || !container) return;
+  const ratio = container.scrollTop / (container.scrollHeight - container.clientHeight || 1);
+  const mmH   = document.querySelector('.minimap').clientHeight;
+  const thumbH = Math.max(20, (container.clientHeight / container.scrollHeight) * mmH);
+  thumb.style.height = thumbH + 'px';
+  thumb.style.top    = ratio * (mmH - thumbH) + 'px';
+}
+
+/* ─────────────────────────────────────────
+   SIDEBAR TOGGLE & FOLDER COLLAPSE
+───────────────────────────────────────── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+function toggleFolder(header) {
+  header.querySelector('.explorer-arrow').classList.toggle('open');
+  const fl = document.getElementById('main-folder');
+  fl.style.display = fl.style.display === 'none' ? '' : 'none';
+}
+
+/* ─────────────────────────────────────────
+   INIT
+───────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  generateMinimap();
+  updateLineNumbers();
+  renderTabs();
+  initScrollSpy();
+  updateMinimapThumb();
+});
+
+/* ─────────────────────────────────────────
+   AI CHAT TWIN
+───────────────────────────────────────── */
+
+// ── CONFIG — change this to your deployed backend URL ──
+const TWIN_API = 'http://localhost:8000';
+
+let chatOpen     = false;
+let chatSessionId = null;
+let isStreaming  = false;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const panel = document.getElementById('chatPanel');
+  const icon  = document.getElementById('chatActivityIcon');
+  panel.classList.toggle('open', chatOpen);
+  icon.classList.toggle('active', chatOpen);
+  if (chatOpen) {
+    document.getElementById('chatInput').focus();
+    if (document.getElementById('chatMessages').children.length === 0) {
+      addBotMessage("Hi! I'm Precious's AI twin 👋 Ask me anything about her background, skills, or projects.");
+    }
+  }
+}
+
+function addBotMessage(text, streaming = false) {
+  const msgs = document.getElementById('chatMessages');
+  const div  = document.createElement('div');
+  div.className = 'chat-msg bot';
+  div.innerHTML = `<span class="chat-avatar">P</span><div class="chat-bubble">${escapeHtml(text)}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div.querySelector('.chat-bubble');
+}
+
+function addUserMessage(text) {
+  const msgs = document.getElementById('chatMessages');
+  const div  = document.createElement('div');
+  div.className = 'chat-msg user';
+  div.innerHTML = `<div class="chat-bubble">${escapeHtml(text)}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addTypingIndicator() {
+  const msgs = document.getElementById('chatMessages');
+  const div  = document.createElement('div');
+  div.className = 'chat-msg bot';
+  div.id = 'typingIndicator';
+  div.innerHTML = `<span class="chat-avatar">P</span><div class="chat-bubble typing"><span></span><span></span><span></span></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const question = input.value.trim();
+  if (!question || isStreaming) return;
+
+  input.value = '';
+  addUserMessage(question);
+  addTypingIndicator();
+  isStreaming = true;
+
+  const sendBtn = document.getElementById('chatSendBtn');
+  sendBtn.disabled = true;
+
+  try {
+    const res = await fetch(`${TWIN_API}/ask?stream=true`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question,
+        session_id: chatSessionId,
+        n_results: 3
+      })
+    });
+
+    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+    // Grab session ID from header if first message
+    if (!chatSessionId) {
+      chatSessionId = res.headers.get('X-Session-Id');
+    }
+
+    removeTypingIndicator();
+    const bubble = addBotMessage('');
+    bubble.textContent = '';
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      fullText += chunk;
+      bubble.textContent = fullText;
+      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+    }
+
+  } catch (err) {
+    removeTypingIndicator();
+    addBotMessage('Sorry, I had trouble connecting. Make sure the backend is running.');
+    console.error('Chat error:', err);
+  } finally {
+    isStreaming = false;
+    sendBtn.disabled = false;
+    document.getElementById('chatInput').focus();
+  }
+}
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+}
+
+function askSuggestion(text) {
+  document.getElementById('chatInput').value = text;
+  sendChat();
+}
+</script>
+
+<!-- ══════════════════════════════════════
+     AI CHAT PANEL  (VS Code terminal style)
+═══════════════════════════════════════ -->
+<div id="chatPanel">
+  <!-- Panel header (like VS Code terminal tab bar) -->
+  <div id="chatHeader">
+    <div class="chat-header-left">
+      <span class="chat-header-dot"></span>
+      <span class="chat-header-title">twin.ai — precious.dev</span>
+    </div>
+    <div class="chat-header-actions">
+      <button class="chat-header-btn" onclick="chatSessionId=null;document.getElementById('chatMessages').innerHTML='';addBotMessage('Session cleared. Ask me anything!')" title="Clear chat">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+      </button>
+      <button class="chat-header-btn" onclick="toggleChat()" title="Close">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Suggested questions (shown only when empty) -->
+  <div id="chatSuggestions">
+    <span class="sug-label">// quick questions</span>
+    <div class="sug-pills">
+      <button class="sug-pill" onclick="askSuggestion('What are your top skills?')">top skills</button>
+      <button class="sug-pill" onclick="askSuggestion('Tell me about your work experience')">experience</button>
+      <button class="sug-pill" onclick="askSuggestion('What projects have you built?')">projects</button>
+      <button class="sug-pill" onclick="askSuggestion('What are you currently working on?')">current work</button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div id="chatMessages"></div>
+
+  <!-- Input row -->
+  <div id="chatInputRow">
+    <span class="chat-prompt">&gt;</span>
+    <input
+      id="chatInput"
+      type="text"
+      placeholder="ask me anything..."
+      onkeydown="chatKeydown(event)"
+      autocomplete="off"
+    />
+    <button id="chatSendBtn" onclick="sendChat()" title="Send">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<style>
+/* ══════════════════════════════════════
+   AI CHAT PANEL — VS Code terminal style
+══════════════════════════════════════ */
+
+#chatPanel {
+  position: fixed;
+  bottom: var(--statusbar-h);
+  left: var(--activity-w);
+  right: 0;
+  height: 340px;
+  background: #1e1e1e;
+  border-top: 2px solid var(--blue);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transform: translateY(100%);
+  transition: transform 0.25s ease;
+  font-family: 'Fira Code', monospace;
+}
+
+#chatPanel.open {
+  transform: translateY(0);
+}
+
+/* ── Header (terminal tab bar style) ── */
+#chatHeader {
+  height: 35px;
+  background: var(--bg-tabs);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  flex-shrink: 0;
+}
+.chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.chat-header-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 6px var(--blue);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+.chat-header-title {
+  font-size: 12px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+}
+.chat-header-actions { display: flex; gap: 4px; }
+.chat-header-btn {
+  width: 24px; height: 24px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s;
+}
+.chat-header-btn:hover { background: var(--bg-hover); color: var(--text); }
+
+/* ── Suggestions ── */
+#chatSuggestions {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sug-label {
+  font-size: 10px;
+  color: var(--comment);
+  font-family: 'JetBrains Mono', monospace;
+  display: block;
+  margin-bottom: 5px;
+}
+.sug-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.sug-pill {
+  padding: 3px 9px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-family: 'Fira Code', monospace;
+  cursor: pointer;
+  transition: all .15s;
+}
+.sug-pill:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: rgba(86,156,214,.08);
+}
+
+/* ── Messages ── */
+#chatMessages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.chat-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.chat-msg.user {
+  flex-direction: row-reverse;
+}
+
+.chat-avatar {
+  width: 24px; height: 24px;
+  border-radius: 4px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.chat-bubble {
+  max-width: 75%;
+  padding: 7px 11px;
+  border-radius: 4px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  font-family: 'Fira Code', monospace;
+  word-break: break-word;
+}
+.chat-msg.bot .chat-bubble {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-top-left-radius: 0;
+}
+.chat-msg.user .chat-bubble {
+  background: #094771;
+  border: 1px solid #2a6496;
+  color: #fff;
+  border-top-right-radius: 0;
+}
+
+/* Typing indicator */
+.chat-bubble.typing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+}
+.chat-bubble.typing span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  display: inline-block;
+  animation: typingBounce 1.2s ease-in-out infinite;
+}
+.chat-bubble.typing span:nth-child(2) { animation-delay: .2s; }
+.chat-bubble.typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: .5; }
+  40%           { transform: translateY(-5px); opacity: 1; }
+}
+
+/* ── Input row ── */
+#chatInputRow {
+  height: 40px;
+  background: #252526;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.chat-prompt {
+  color: var(--green);
+  font-size: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  user-select: none;
+}
+#chatInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  caret-color: var(--blue);
+}
+#chatInput::placeholder { color: var(--text-dim); }
+#chatSendBtn {
+  width: 28px; height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: color .15s, background .15s;
+}
+#chatSendBtn:hover:not(:disabled) { color: var(--blue); background: var(--bg-hover); }
+#chatSendBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Mobile adjustments ── */
+@media (max-width: 768px) {
+  #chatPanel {
+    left: 0;
+    height: 300px;
+  }
+}
+</style>
+</body>
+</html>

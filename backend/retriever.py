@@ -15,7 +15,6 @@ def embed(text):
 
 
 def chunk_text(text, max_tokens=600):
-    """Split text into overlapping chunks."""
     sentences = text.split(". ")
     chunks = []
     chunk = ""
@@ -30,7 +29,7 @@ def chunk_text(text, max_tokens=600):
     return chunks
 
 
-def add_document(text, doc_id=None):
+def add_document(text, source=None):
     chunks = chunk_text(text)
     for chunk in chunks:
         vector = embed(chunk)

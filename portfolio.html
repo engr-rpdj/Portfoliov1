@@ -598,29 +598,89 @@ textarea.form-input { resize: vertical; min-height: 90px; }
     <span class="label-name">home<span>.tsx</span></span>
   </div>
 
-  <span class="cm">// src/components/Home.tsx</span><br><br>
+  <!-- File comment -->
+  <span class="cm">// src/components/Home.tsx</span><br>
+  <span class="cm">// last modified: 2026 · open to work ✦</span><br><br>
+
   <span class="kw">export default function</span> <span class="fn">Home</span><span class="punc">() {</span><br>
-  <span class="i1"></span><span class="kw">return</span> <span class="punc">(</span><br>
-  <span class="i2"></span><span style="color:#808080">&lt;</span><span class="ty">section</span><span style="color:#808080">&gt;</span><br><br>
+  <span class="i1"></span><span class="kw">return</span> <span class="punc">(</span><br><br>
 
-  <span class="i3"></span><span class="kw">const</span> <span class="var">developer</span> <span class="op">=</span> <span class="punc">{</span><br>
-  <span class="i3"></span><span class="i1"></span><span class="prop">name</span><span class="op">:</span>    <span class="str">"Precious"</span><span class="punc">,</span><br>
-  <span class="i3"></span><span class="i1"></span><span class="prop">role</span><span class="op">:</span>    <span class="str">"AI Engineer &amp; Web Developer"</span><span class="punc">,</span><br>
-  <span class="i3"></span><span class="i1"></span><span class="prop">passion</span><span class="op">:</span> <span class="str">"Building intelligent systems"</span><span class="punc">,</span><br>
-  <span class="i3"></span><span class="punc">};</span><span class="home-cursor"></span><br><br>
+  <!-- ── HERO BLOCK ── -->
+  <div style="padding-left:32px; margin-bottom:28px;">
 
-  <!-- Quick navigation links — add/remove as needed -->
-  <div class="quick-links" style="padding-left:72px; margin-bottom:16px">
-    <div class="quick-link" onclick="goTo('about')">→ about.tsx</div>
-    <div class="quick-link" onclick="goTo('experience')">→ experience.tsx</div>
-    <div class="quick-link" onclick="goTo('projects')">→ projects.tsx</div>
-    <div class="quick-link" onclick="goTo('competitions')">→ competitions.tsx</div>
-    <div class="quick-link" onclick="goTo('skills')">→ skills.tsx</div>
-    <div class="quick-link" onclick="goTo('certifications')">→ certifications.tsx</div>
-    <div class="quick-link" onclick="goTo('contact')">→ contact.tsx</div>
+    <!-- Availability badge -->
+    <div style="display:inline-flex; align-items:center; gap:7px; padding:4px 12px; border:1px solid #1e4a3d; background:#0a1f1a; border-radius:3px; margin-bottom:18px;">
+      <span style="width:7px;height:7px;border-radius:50%;background:#4ec9b0;box-shadow:0 0 6px #4ec9b0;animation:pulse 2s ease-in-out infinite;display:inline-block;"></span>
+      <span style="color:#4ec9b0; font-size:11px; font-family:'JetBrains Mono',monospace;">available for work</span>
+    </div>
+
+    <!-- Name -->
+    <div style="font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:700; color:#d4d4d4; line-height:1.2; margin-bottom:6px;">
+      Hi, I'm <span style="color:#4ec9b0;">Precious</span><span class="home-cursor"></span>
+    </div>
+
+    <!-- Role line -->
+    <div style="font-family:'JetBrains Mono',monospace; font-size:14px; color:#569cd6; margin-bottom:16px; letter-spacing:0.03em;">
+      AI Engineer &nbsp;·&nbsp; Full-Stack Developer &nbsp;·&nbsp; Philippines 🇵🇭
+    </div>
+
+    <!-- One-liner -->
+    <div style="font-size:13.5px; color:#a0a0a0; line-height:1.85; max-width:580px; margin-bottom:24px; font-family:'Fira Code',monospace;">
+      I build <span style="color:#d4d4d4;">intelligent systems</span> that make complex things simple —
+      from AI tools that let developers <span style="color:#d4d4d4;">understand any codebase instantly</span>,
+      to computer vision systems and embedded IoT solutions.
+    </div>
+
+    <!-- Featured project callout -->
+    <div style="border:1px solid #2a4a6b; background:#0d2035; border-radius:4px; padding:14px 18px; max-width:540px; margin-bottom:24px;">
+      <div style="font-size:10px; color:#6a9955; font-family:'JetBrains Mono',monospace; margin-bottom:8px;">// featured project</div>
+      <div style="display:flex; align-items:flex-start; gap:10px;">
+        <span style="font-size:20px; line-height:1;">🔍</span>
+        <div>
+          <div style="color:#4fc1ff; font-size:13px; font-family:'JetBrains Mono',monospace; font-weight:600; margin-bottom:4px;">
+            CodeSpotlight — AI GitHub Repository Scanner
+          </div>
+          <div style="color:#a0a0a0; font-size:12px; line-height:1.7;">
+            AI that scans any GitHub repo and surfaces what matters — architecture, patterns, risks —
+            so developers can understand unfamiliar code <span style="color:#d4d4d4;">without needing a senior dev to explain it</span>.
+            Includes an interactive chat interface for deep-diving into the codebase.
+          </div>
+          <div class="tag-grid" style="margin-top:8px;">
+            <span class="tag tb">LLM</span>
+            <span class="tag tg">FastAPI</span>
+            <span class="tag tt">RAG</span>
+            <span class="tag ty2">GitHub API</span>
+            <span class="tag tp">OpenAI</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick nav links -->
+    <div class="quick-links">
+      <div class="quick-link" onclick="goTo('about')">→ about.tsx</div>
+      <div class="quick-link" onclick="goTo('experience')">→ experience.tsx</div>
+      <div class="quick-link" onclick="goTo('projects')">→ projects.tsx</div>
+      <div class="quick-link" onclick="goTo('competitions')">→ competitions.tsx</div>
+      <div class="quick-link" onclick="goTo('skills')">→ skills.tsx</div>
+      <div class="quick-link" onclick="goTo('certifications')">→ certifications.tsx</div>
+      <div class="quick-link" onclick="goTo('contact')">→ contact.tsx</div>
+    </div>
+
   </div>
 
-  <span class="i2"></span><span style="color:#808080">&lt;/</span><span class="ty">section</span><span style="color:#808080">&gt;</span><br>
+  <!-- Dev object block -->
+  <div style="padding-left:32px; margin-top:8px;">
+    <span class="kw">const</span> <span class="var">precious</span> <span class="op">=</span> <span class="punc">{</span><br>
+    <span class="i1"></span><span class="prop">role</span><span class="op">:</span>       <span class="str">"AI Engineer"</span><span class="punc">,</span><br>
+    <span class="i1"></span><span class="prop">education</span><span class="op">:</span>  <span class="str">"B.S. Computer Engineering · BatStateU"</span><span class="punc">,</span><br>
+    <span class="i1"></span><span class="prop">focus</span><span class="op">:</span>      <span class="punc">[</span><span class="str">"LLM Engineering"</span><span class="punc">,</span> <span class="str">"Computer Vision"</span><span class="punc">,</span> <span class="str">"Full-Stack AI Apps"</span><span class="punc">],</span><br>
+    <span class="i1"></span><span class="prop">stack</span><span class="op">:</span>      <span class="punc">[</span><span class="str">"Python"</span><span class="punc">,</span> <span class="str">"FastAPI"</span><span class="punc">,</span> <span class="str">"OpenAI"</span><span class="punc">,</span> <span class="str">"React"</span><span class="punc">,</span> <span class="str">"AWS"</span><span class="punc">],</span><br>
+    <span class="i1"></span><span class="prop">status</span><span class="op">:</span>     <span class="str" style="color:#4ec9b0;">"open_to_opportunities"</span><span class="punc">,</span><br>
+    <span class="punc">};</span>
+  </div>
+
+  <br>
   <span class="i1"></span><span class="punc">);</span><br>
   <span class="punc">}</span>
 

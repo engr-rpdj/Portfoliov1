@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>precious.dev — VS Code</title>
+  <title>reginepreciousdejoya</title>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet"/>
   <style>
 /* ============================================================
@@ -101,7 +101,7 @@ body {
 .ctrl.maximize { background: #28c840; }
 
 /* ── WORKBENCH ── */
-.workbench { display: flex; flex: 1; overflow: hidden; }
+.workbench { display: flex; flex: 1; overflow: hidden; position: relative; z-index: 1; }
 
 /* ── ACTIVITY BAR ── */
 .activity-bar {
@@ -243,11 +243,14 @@ body {
 }
 
 /* ── STATUS BAR ── */
+/* ── STATUS BAR ── */
 .statusbar {
   height: var(--statusbar-h); background: #007acc;
   display: flex; align-items: center;
   padding: 0 12px; gap: 16px;
   font-size: 11.5px; flex-shrink: 0; user-select: none;
+  position: relative;
+  z-index: 50;
 }
 .statusbar span { color: #ffffffcc; }
 .sb-right { margin-left: auto; display: flex; gap: 16px; }
@@ -344,7 +347,7 @@ body {
 .section-block {
   padding: 36px 32px 56px 20px;
   border-bottom: 1px solid var(--border);
-  min-height: 100vh; /* each section fills the viewport */
+  min-height: auto; /* each section fills the viewport */
 }
 .section-block:last-child { border-bottom: none; min-height: auto; }
 
@@ -527,9 +530,9 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 <!-- TITLEBAR -->
 <div class="titlebar">
   <div class="titlebar-menu">
-    <span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Run</span><span>Terminal</span><span>Help</span>
+    <span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Run</span><span onclick="toggleChat()">Terminal</span><span>Help</span>
   </div>
-  <div class="titlebar-title">precious.dev — Visual Studio Code</div>
+  <div class="titlebar-title">engr-rpdj.dev</div>
   <div class="titlebar-controls">
     <div class="ctrl minimize"></div><div class="ctrl maximize"></div><div class="ctrl close"></div>
   </div>
@@ -539,12 +542,16 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 
   <!-- ACTIVITY BAR -->
   <div class="activity-bar">
-    <div class="activity-icon active" onclick="toggleSidebar()" title="Explorer">
+    <div class="activity-icon active" id="explorerActivityIcon" onclick="toggleSidebarIcon()" title="Explorer">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7h5v5H3zM3 14h5v5H3zM10 3h11v5H10zM10 10h11v5H10zM10 17h11v5H10z"/></svg>
     </div>
-    <div class="activity-icon" title="Search">
+    <div class="activity-icon" id="searchActivityIcon" title="Search" onclick="toggleSearch()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
     </div>
+    <div class="activity-icon" id="chatActivityIcon" title="Ask AI Twin" onclick="toggleChat()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    
     <div class="activity-icon" title="Source Control">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="12" r="2"/><path d="M6 8v8M6 8c0 3 12 4 12 4"/></svg>
     </div>
@@ -552,11 +559,21 @@ textarea.form-input { resize: vertical; min-height: 90px; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="9" height="9" rx="1"/><rect x="13" y="2" width="9" height="9" rx="1"/><rect x="2" y="13" width="9" height="9" rx="1"/><path d="M13 17.5h4m-2-2v4"/></svg>
     </div>
     <!-- CHAT ICON — opens the AI twin panel -->
-    <div class="activity-icon" id="chatActivityIcon" title="Ask AI Twin" onclick="toggleChat()" style="margin-top:auto;margin-bottom:8px;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    </div>
+    
   </div>
 
+  <div id="searchPanel" style="width:var(--sidebar-w);background:var(--bg-sidebar);border-right:1px solid var(--border);display:none;flex-direction:column;overflow:hidden;flex-shrink:0;position:relative;z-index:1;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;padding:12px 16px 8px;user-select:none;">Search</div>
+    <div style="padding:0 8px 8px;">
+      <div style="display:flex;align-items:center;background:#3c3c3c;border:1px solid #555;border-radius:3px;padding:4px 8px;gap:6px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#858585" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="searchInput" type="text" placeholder="Search portfolio..." autocomplete="off" oninput="runSearch(this.value)" onkeydown="searchKeydown(event)" style="background:transparent;border:none;outline:none;color:var(--text);font-family:'Fira Code',monospace;font-size:12px;width:100%;caret-color:var(--blue);"/>
+        <span id="searchCount" style="font-size:10px;color:var(--text-dim);white-space:nowrap;display:none;"></span>
+      </div>
+    </div>
+    <div id="searchResults" style="flex:1;overflow-y:auto;padding:0 4px 8px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;"></div>
+  </div>
+  
   <!-- SIDEBAR -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-title">Explorer</div>
@@ -568,7 +585,7 @@ textarea.form-input { resize: vertical; min-height: 90px; }
       <div class="file-item"        data-section="about"         onclick="scrollToSection('about')">        <span class="file-icon">👤</span>about<span class="file-ext">.tsx</span></div>
       <div class="file-item"        data-section="experience"    onclick="scrollToSection('experience')">   <span class="file-icon">💼</span>experience<span class="file-ext">.tsx</span></div>
       <div class="file-item"        data-section="projects"      onclick="scrollToSection('projects')">     <span class="file-icon">🚀</span>projects<span class="file-ext">.tsx</span></div>
-      <div class="file-item"        data-section="competitions"  onclick="scrollToSection('competitions')"> <span class="file-icon">🏆</span>competitions<span class="file-ext">.tsx</span></div>
+      <div class="file-item"        data-section="hackathons"  onclick="scrollToSection('hackathons')"> <span class="file-icon">🏆</span>hackathons<span class="file-ext">.tsx</span></div>
       <div class="file-item"        data-section="skills"        onclick="scrollToSection('skills')">       <span class="file-icon">⚡</span>skills<span class="file-ext">.tsx</span></div>
       <div class="file-item"        data-section="certifications"onclick="scrollToSection('certifications')"><span class="file-icon">🎓</span>certifications<span class="file-ext">.tsx</span></div>
       <div class="file-item"        data-section="contact"       onclick="scrollToSection('contact')">      <span class="file-icon">📬</span>contact<span class="file-ext">.tsx</span></div>
@@ -600,87 +617,132 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 
   <!-- File comment -->
   <span class="cm">// src/components/Home.tsx</span><br>
-  <span class="cm">// last modified: 2026 · open to work ✦</span><br><br>
 
   <span class="kw">export default function</span> <span class="fn">Home</span><span class="punc">() {</span><br>
   <span class="i1"></span><span class="kw">return</span> <span class="punc">(</span><br><br>
 
-  <!-- ── HERO BLOCK ── -->
-  <div style="padding-left:32px; margin-bottom:28px;">
+  <!-- ── HERO BLOCK — two column ── -->
+  <div style="display:flex; gap:32px; align-items:flex-start; padding-left:32px; margin-bottom:28px;">
 
-    <!-- Availability badge -->
-    <div style="display:inline-flex; align-items:center; gap:7px; padding:4px 12px; border:1px solid #1e4a3d; background:#0a1f1a; border-radius:3px; margin-bottom:18px;">
-      <span style="width:7px;height:7px;border-radius:50%;background:#4ec9b0;box-shadow:0 0 6px #4ec9b0;animation:pulse 2s ease-in-out infinite;display:inline-block;"></span>
-      <span style="color:#4ec9b0; font-size:11px; font-family:'JetBrains Mono',monospace;">available for work</span>
-    </div>
+    <!-- LEFT COLUMN -->
+    <div style="flex:1; min-width:0;">
 
-    <!-- Name -->
-    <div style="font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:700; color:#d4d4d4; line-height:1.2; margin-bottom:6px;">
-      Hi, I'm <span style="color:#4ec9b0;">Precious</span><span class="home-cursor"></span>
-    </div>
+      <div style="display:inline-flex; align-items:center; gap:7px; padding:4px 12px; border:1px solid #1e4a3d; background:#0a1f1a; border-radius:3px; margin-bottom:18px;">
+        <span style="width:7px;height:7px;border-radius:50%;background:#4ec9b0;box-shadow:0 0 6px #4ec9b0;animation:pulse 2s ease-in-out infinite;display:inline-block;"></span>
+        <span style="color:#4ec9b0; font-size:11px; font-family:'JetBrains Mono',monospace;">available for work</span>
+      </div>
 
-    <!-- Role line -->
-    <div style="font-family:'JetBrains Mono',monospace; font-size:14px; color:#569cd6; margin-bottom:16px; letter-spacing:0.03em;">
-      AI Engineer &nbsp;·&nbsp; Full-Stack Developer &nbsp;·&nbsp; Philippines 🇵🇭
-    </div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:700; color:#d4d4d4; line-height:1.2; margin-bottom:6px;">
+        Hi, I'm <span style="color:#4ec9b0;">Precious</span><span class="home-cursor"></span>
+      </div>
 
-    <!-- One-liner -->
-    <div style="font-size:13.5px; color:#a0a0a0; line-height:1.85; max-width:580px; margin-bottom:24px; font-family:'Fira Code',monospace;">
-      I build <span style="color:#d4d4d4;">intelligent systems</span> that make complex things simple —
-      from AI tools that let developers <span style="color:#d4d4d4;">understand any codebase instantly</span>,
-      to computer vision systems and embedded IoT solutions.
-    </div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:14px; color:#569cd6; margin-bottom:16px; letter-spacing:0.03em;">
+        AI Engineer &nbsp;·&nbsp; Full-Stack Developer &nbsp;·&nbsp; Philippines 🇵🇭
+      </div>
 
-    <!-- Featured project callout -->
-    <div style="border:1px solid #2a4a6b; background:#0d2035; border-radius:4px; padding:14px 18px; max-width:540px; margin-bottom:24px;">
-      <div style="font-size:10px; color:#6a9955; font-family:'JetBrains Mono',monospace; margin-bottom:8px;">// featured project</div>
-      <div style="display:flex; align-items:flex-start; gap:10px;">
-        <span style="font-size:20px; line-height:1;">🔍</span>
-        <div>
-          <div style="color:#4fc1ff; font-size:13px; font-family:'JetBrains Mono',monospace; font-weight:600; margin-bottom:4px;">
-            CodeSpotlight — AI GitHub Repository Scanner
-          </div>
-          <div style="color:#a0a0a0; font-size:12px; line-height:1.7;">
-            AI that scans any GitHub repo and surfaces what matters — architecture, patterns, risks —
-            so developers can understand unfamiliar code <span style="color:#d4d4d4;">without needing a senior dev to explain it</span>.
-            Includes an interactive chat interface for deep-diving into the codebase.
-          </div>
-          <div class="tag-grid" style="margin-top:8px;">
-            <span class="tag tb">LLM</span>
-            <span class="tag tg">FastAPI</span>
-            <span class="tag tt">RAG</span>
-            <span class="tag ty2">GitHub API</span>
-            <span class="tag tp">OpenAI</span>
+      <div style="font-size:13.5px; color:#a0a0a0; line-height:1.85; max-width:480px; margin-bottom:24px; font-family:'Fira Code',monospace;">
+      AI is reshaping the world — and I build the <span style="color:#4ec9b0;">systems driving it</span>,
+      from <span style="color:#4fc1ff;">intelligent software</span> all the way down to <span style="color:#dcdcaa;">the hardware it runs on.</span>
+      </div>
+
+      <div style="border:1px solid #2a4a6b; background:#0d2035; border-radius:4px; padding:14px 18px; max-width:480px; margin-bottom:24px;">
+        <div style="font-size:10px; color:#6a9955; font-family:'JetBrains Mono',monospace; margin-bottom:8px;">// featured project</div>
+        <div style="display:flex; align-items:flex-start; gap:10px;">
+          <span style="font-size:20px; line-height:1;">🔍</span>
+          <div>
+            <div style="color:#4fc1ff; font-size:13px; font-family:'JetBrains Mono',monospace; font-weight:600; margin-bottom:4px;">
+              CodeSpotlight — AI GitHub Repository Scanner
+            </div>
+            <div style="color:#a0a0a0; font-size:12px; line-height:1.7;">
+              AI that scans any GitHub repo and surfaces what matters — architecture, patterns, risks —
+              so developers can understand unfamiliar code <span style="color:#d4d4d4;">without needing a senior dev to explain it</span>.
+              Includes an interactive chat interface for deep-diving into the codebase.
+            </div>
+            <div class="tag-grid" style="margin-top:8px;">
+              <span class="tag tb">LLM</span>
+              <span class="tag tg">FastAPI</span>
+              <span class="tag tt">RAG</span>
+              <span class="tag ty2">GitHub API</span>
+              <span class="tag tp">OpenAI</span>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+              <a href="https://github.com/engr-rpdj/CodeSpotlightv1" target="_blank"
+                 style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:#252526; border:1px solid #3c3c3c; border-radius:3px; color:#d4d4d4; text-decoration:none; font-size:11px; font-family:'Fira Code',monospace; transition:border-color .15s, color .15s;"
+                 onmouseover="this.style.borderColor='#569cd6';this.style.color='#569cd6'"
+                 onmouseout="this.style.borderColor='#3c3c3c';this.style.color='#d4d4d4'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                view source
+              </a>
+              <a href="https://codespotlightv1-production.up.railway.app/" target="_blank"
+                 style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:#0a1f1a; border:1px solid #1e4a3d; border-radius:3px; color:#4ec9b0; text-decoration:none; font-size:11px; font-family:'Fira Code',monospace;"
+                 onmouseover="this.style.background='#0d2a20';this.style.borderColor='#4ec9b0'"
+                 onmouseout="this.style.background='#0a1f1a';this.style.borderColor='#1e4a3d'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                try it live ↗
+              </a>
+            </div>
           </div>
         </div>
       </div>
+
+      <div class="quick-links">
+        <div class="quick-link" onclick="goTo('about')">→ about.tsx</div>
+        <div class="quick-link" onclick="goTo('experience')">→ experience.tsx</div>
+        <div class="quick-link" onclick="goTo('projects')">→ projects.tsx</div>
+        <div class="quick-link" onclick="goTo('hackathons')">→ hackathons.tsx</div>
+        <div class="quick-link" onclick="goTo('skills')">→ skills.tsx</div>
+        <div class="quick-link" onclick="goTo('certifications')">→ certifications.tsx</div>
+        <div class="quick-link" onclick="goTo('contact')">→ contact.tsx</div>
+      </div>
+
     </div>
 
-    <!-- Quick nav links -->
-    <div class="quick-links">
-      <div class="quick-link" onclick="goTo('about')">→ about.tsx</div>
-      <div class="quick-link" onclick="goTo('experience')">→ experience.tsx</div>
-      <div class="quick-link" onclick="goTo('projects')">→ projects.tsx</div>
-      <div class="quick-link" onclick="goTo('competitions')">→ competitions.tsx</div>
-      <div class="quick-link" onclick="goTo('skills')">→ skills.tsx</div>
-      <div class="quick-link" onclick="goTo('certifications')">→ certifications.tsx</div>
-      <div class="quick-link" onclick="goTo('contact')">→ contact.tsx</div>
+    <!-- RIGHT COLUMN — AI Twin Photo -->
+    <div style="flex-shrink:0; width:220px; display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:-90px;">
+
+      <!-- Photo card -->
+      <div id="profilePhotoCard" onclick="toggleChat()"
+           style="width:220px; cursor:pointer; border:1px solid #3c3c3c; border-radius:4px; overflow:hidden; background:#252526; transition:border-color .2s, box-shadow .2s; position:relative;"
+           onmouseover="this.style.borderColor='#4ec9b0';this.style.boxShadow='0 0 16px rgba(78,201,176,0.15)';document.getElementById('profileOverlay').style.opacity='1'"
+           onmouseout="this.style.borderColor='#3c3c3c';this.style.boxShadow='none';document.getElementById('profileOverlay').style.opacity='0'">
+
+        <!-- Tab bar on top of photo -->
+        <div style="background:#2d2d2d; border-bottom:1px solid #3c3c3c; padding:0 10px; height:28px; display:flex; align-items:center; gap:6px;">
+          <span style="width:7px;height:7px;border-radius:50%;background:#4ec9b0;box-shadow:0 0 5px #4ec9b0;animation:pulse 2s ease-in-out infinite;display:inline-block;"></span>
+          <span style="font-size:10px; color:#858585; font-family:'JetBrains Mono',monospace;">Chat with me!</span>
+        </div>
+
+        <!-- Photo -->
+        <img src="/images/profile.jpg" alt="Precious"
+             style="width:100%; height:260px; object-fit:cover; object-position:top; display:block;"
+             onerror="this.style.display='none'; document.getElementById('profilePlaceholder').style.display='flex'"/>
+
+        <!-- Placeholder if no photo -->
+        <div id="profilePlaceholder"
+             style="display:none; width:100%; height:260px; align-items:center; justify-content:center; background:#1e1e1e; flex-direction:column; gap:8px;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3c3c3c" stroke-width="1"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <span style="font-size:10px; color:#3c3c3c; font-family:'Fira Code',monospace;">profile.jpg</span>
+        </div>
+
+        <!-- Hover overlay -->
+        <div id="profileOverlay"
+             style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent, rgba(10,31,26,0.95)); padding:14px 12px; opacity:0; transition:opacity .2s;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ec9b0" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span style="color:#4ec9b0; font-size:11px; font-family:'JetBrains Mono',monospace;">ask me anything →</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Caption -->
+      <div style="text-align:center;">
+        <div style="font-size:11px; color:#858585; font-family:'JetBrains Mono',monospace;">// click to chat with my AI twin</div>
+      </div>
+
     </div>
 
   </div>
-
-  <!-- Dev object block -->
-  <div style="padding-left:32px; margin-top:8px;">
-    <span class="kw">const</span> <span class="var">precious</span> <span class="op">=</span> <span class="punc">{</span><br>
-    <span class="i1"></span><span class="prop">role</span><span class="op">:</span>       <span class="str">"AI Engineer"</span><span class="punc">,</span><br>
-    <span class="i1"></span><span class="prop">education</span><span class="op">:</span>  <span class="str">"B.S. Computer Engineering · BatStateU"</span><span class="punc">,</span><br>
-    <span class="i1"></span><span class="prop">focus</span><span class="op">:</span>      <span class="punc">[</span><span class="str">"LLM Engineering"</span><span class="punc">,</span> <span class="str">"Computer Vision"</span><span class="punc">,</span> <span class="str">"Full-Stack AI Apps"</span><span class="punc">],</span><br>
-    <span class="i1"></span><span class="prop">stack</span><span class="op">:</span>      <span class="punc">[</span><span class="str">"Python"</span><span class="punc">,</span> <span class="str">"FastAPI"</span><span class="punc">,</span> <span class="str">"OpenAI"</span><span class="punc">,</span> <span class="str">"React"</span><span class="punc">,</span> <span class="str">"AWS"</span><span class="punc">],</span><br>
-    <span class="i1"></span><span class="prop">status</span><span class="op">:</span>     <span class="str" style="color:#4ec9b0;">"open_to_opportunities"</span><span class="punc">,</span><br>
-    <span class="punc">};</span>
-  </div>
-
-  <br>
   <span class="i1"></span><span class="punc">);</span><br>
   <span class="punc">}</span>
 
@@ -700,27 +762,133 @@ textarea.form-input { resize: vertical; min-height: 90px; }
   <span class="kw">export default function</span> <span class="fn">About</span><span class="punc">() {</span><br>
   <span class="i1"></span><span class="kw">return</span> <span class="punc">(</span><br><br>
 
-  <!-- ── Bio paragraphs — edit text here ── -->
-  <div style="padding-left:32px; max-width:640px; margin-bottom:20px">
-    <div style="color:var(--text); font-size:14px; line-height:1.9; margin-bottom:14px">
-      I am an <span class="ty">AI Engineer</span> and <span class="ty">Web Developer</span> passionate about
-      building machine learning systems, computer vision projects, and scalable
-      full-stack applications.
-    </div>
-    <div style="color:var(--text-muted); font-size:13.5px; line-height:1.9">
-      I specialize in <span class="str">Python</span>, <span class="str">deep learning</span>,
-      <span class="str">backend systems</span>, and modern web development.
-    </div>
-  </div>
+  <div style="padding-left:32px; max-width:900px;">
 
-  <!-- ── Details object — edit values here ── -->
-  <div style="padding-left:32px">
-    <span class="kw">const</span> <span class="var">details</span> <span class="op">=</span> <span class="punc">{</span><br>
-    <span class="i1"></span><span class="prop">education</span><span class="op">:</span> <span class="str">"B.S. Computer Engineering — BatStateU"</span><span class="punc">,</span><br>
-    <span class="i1"></span><span class="prop">focus</span><span class="op">:</span>     <span class="punc">[</span><span class="str">"AI / ML"</span><span class="punc">,</span> <span class="str">"Computer Vision"</span><span class="punc">,</span> <span class="str">"Full Stack"</span><span class="punc">,</span> <span class="str">"Embedded Systems"</span><span class="punc">],</span><br>
-    <span class="i1"></span><span class="prop">location</span><span class="op">:</span>  <span class="str">"Philippines 🇵🇭"</span><span class="punc">,</span><br>
-    <span class="i1"></span><span class="prop">status</span><span class="op">:</span>    <span class="str">"open_to_opportunities"</span><span class="punc">,</span><br>
-    <span class="punc">};</span>
+    <!-- Origin story -->
+    <div style="margin-bottom:24px;">
+      <div style="color:#6a9955; font-size:11px; font-family:'JetBrains Mono',monospace; margin-bottom:10px;">// origin_story.txt</div>
+
+      <div style="color:#d4d4d4; font-size:13.5px; line-height:1.95; margin-bottom:14px;">
+        I got into AI because I believe it's one of the most powerful forces reshaping the world right now —
+        and what fascinates me most is that <span style="color:#4ec9b0;">you can apply it to almost anything.</span>
+      </div>
+
+      <div style="color:#a0a0a0; font-size:13px; line-height:1.95; margin-bottom:14px;">
+        As a Computer Engineer, my core principle has always been simple:
+        <span style="color:#d4d4d4; font-style:italic;">"laziness is the mother of invention."</span>
+        If something can be automated, it should be. That belief is what drives my passion for
+        AI, IoT, and embedded systems — building things that work smarter so people don't have to work harder.
+      </div>
+
+      <div style="color:#a0a0a0; font-size:13px; line-height:1.95;">
+        What makes me different is that I don't just stop at the software side.
+        I bridge the gap between <span style="color:#d4d4d4;">AI-powered applications and physical hardware</span> —
+        building LLM APIs on one end, and programming microcontrollers and microprocessors
+        on the other, configuring Linux environments and wiring up sensors.
+        Software and hardware, one complete package.
+      </div>
+    </div>
+
+    <div class="s-divider"></div>
+
+    <!-- Stats row -->
+    <div style="margin-bottom:24px;">
+      <div style="color:#6a9955; font-size:11px; font-family:'JetBrains Mono',monospace; margin-bottom:12px;">// by_the_numbers</div>
+      <div style="display:flex; gap:24px; flex-wrap:wrap;">
+
+        <div style="text-align:center; min-width:80px;">
+          <div style="font-size:26px; font-weight:700; color:#569cd6; font-family:'JetBrains Mono',monospace; line-height:1;">15+</div>
+          <div style="font-size:11px; color:#858585; margin-top:4px;">Python & Java<br>freelance projects</div>
+        </div>
+
+        <div style="text-align:center; min-width:80px;">
+          <div style="font-size:26px; font-weight:700; color:#4ec9b0; font-family:'JetBrains Mono',monospace; line-height:1;">3+</div>
+          <div style="font-size:11px; color:#858585; margin-top:4px;">UI/UX interfaces<br>designed</div>
+        </div>
+
+        <div style="text-align:center; min-width:80px;">
+          <div style="font-size:26px; font-weight:700; color:#dcdcaa; font-family:'JetBrains Mono',monospace; line-height:1;">4+</div>
+          <div style="font-size:11px; color:#858585; margin-top:4px;">years building<br>software & hardware</div>
+        </div>
+
+        <div style="text-align:center; min-width:80px;">
+          <div style="font-size:26px; font-weight:700; color:#c586c0; font-family:'JetBrains Mono',monospace; line-height:1;">6+</div>
+          <div style="font-size:11px; color:#858585; margin-top:4px;">hackathons &<br>competitions</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="s-divider"></div>
+
+    <!-- Education -->
+    <div style="margin-bottom:24px;">
+      <div style="color:#6a9955; font-size:11px; font-family:'JetBrains Mono',monospace; margin-bottom:10px;">// education</div>
+      <span class="kw">const</span> <span class="var">education</span> <span class="op">=</span> <span class="punc">{</span><br>
+      <span class="i1"></span><span class="prop">degree</span><span class="op">:</span>     <span class="str">"B.S. Computer Engineering"</span><span class="punc">,</span><br>
+      <span class="i1"></span><span class="prop">university</span><span class="op">:</span> <span class="str">"Batangas State University - The National Engineering University"</span><span class="punc">,</span><br>
+      <span class="i1"></span><span class="prop">graduated</span><span class="op">:</span>  <span class="str">"July 2025"</span><span class="punc">,</span><br>
+      <span class="i1"></span><span class="prop">gpa</span><span class="op">:</span>        <span class="num">"1.5751"</span><span class="punc">,</span><br>
+      <span class="i1"></span><span class="prop">thesis</span><span class="op">:</span>     <span class="str">"Implementing Smart Buoy Technology with Deep Learning Algorithm for Detection of Drowning Instances in Taal Lake, Batangas"</span><span class="punc">,</span><br>
+      <span class="i1"></span><span class="prop">honors</span><span class="op">:</span> <span class="punc">[</span><br>
+      <span class="i2"></span><span class="str">"Dean's Lister · Top 7, 2024"</span><span class="punc">,</span><br>
+      <span class="i2"></span><span class="str">"Top Performing Student · Top 6, 2022 · Top 3, 2023"</span><span class="punc">],</span><br>
+      <span class="i1"></span><span class="prop">scholarship</span><span class="op">:</span> <span class="punc">[</span><br>
+      <span class="i2"></span><span class="str">"Data Engineering Pilipinas x DataCamp Scholar"</span><span class="punc"></span><br>
+      <span class="i1"></span><span class="punc">],</span><br>
+      <span class="punc">};</span>
+    </div>
+
+    <div class="s-divider"></div>
+
+    <!-- Beyond the code -->
+    <div>
+      <div style="color:#6a9955; font-size:11px; font-family:'JetBrains Mono',monospace; margin-bottom:10px;">// beyond_the_code</div>
+      <div style="display:flex; flex-wrap:wrap; gap:10px;">
+
+        <div style="display:flex; align-items:center; gap:8px; padding:8px 14px; background:#252526; border:1px solid #3c3c3c; border-radius:4px;">
+          <span style="font-size:16px;">🏸</span>
+          <div>
+            <div style="color:#d4d4d4; font-size:12px; font-family:'JetBrains Mono',monospace;">Racket Sports</div>
+            <div style="color:#858585; font-size:11px;">badminton, tennis</div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px; padding:8px 14px; background:#252526; border:1px solid #3c3c3c; border-radius:4px;">
+          <span style="font-size:16px;">♟️</span>
+          <div>
+            <div style="color:#d4d4d4; font-size:12px; font-family:'JetBrains Mono',monospace;">Chess</div>
+            <div style="color:#858585; font-size:11px;">strategic thinker</div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px; padding:8px 14px; background:#252526; border:1px solid #3c3c3c; border-radius:4px;">
+          <span style="font-size:16px;">🏆</span>
+          <div>
+            <div style="color:#d4d4d4; font-size:12px; font-family:'JetBrains Mono',monospace;">Hackathons</div>
+            <div style="color:#858585; font-size:11px;">competitive builder</div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px; padding:8px 14px; background:#252526; border:1px solid #3c3c3c; border-radius:4px;">
+          <span style="font-size:16px;">⚙️</span>
+          <div>
+            <div style="color:#d4d4d4; font-size:12px; font-family:'JetBrains Mono',monospace;">Hardware Tinkerer</div>
+            <div style="color:#858585; font-size:11px;">if it exists, automate it</div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px; padding:8px 14px; background:#252526; border:1px solid #3c3c3c; border-radius:4px;">
+          <span style="font-size:16px;">🤖</span>
+          <div>
+            <div style="color:#d4d4d4; font-size:12px; font-family:'JetBrains Mono',monospace;">Gundam Builder</div>
+            <div style="color:#858585; font-size:11px;">where engineering meets art</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 
   <br>
@@ -747,129 +915,144 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 
   <div class="timeline">
 
-    <!-- ── JOB 1 ── -->
+    <!-- DXC -->
     <div class="tl-item">
       <div class="tl-dot"></div>
       <img src="/images/logodxc.jpg" alt="DXC" class="tl-logo" onerror="this.style.display='none'"/>
       <div class="tl-co">DXC TECHNOLOGY</div>
       <div class="tl-role">Analyst II — ERP Package Applications</div>
-      <span class="tl-period">📅 Sep 2025 – Mar 2025 · Full-time</span>
+      <span class="tl-period">Sep 2025 – Mar 2026 · Full-time</span>
       <div class="tl-desc">
-        Supported SAP systems by analyzing tickets, gathering requirements, and performing data migration
-        and visualization, improving system stability, data integrity, and reducing issue resolution time
-        across multiple accounts.
+        Managed <span style="color:#d4d4d4;">3 client accounts simultaneously</span>, monitoring SAP tickets and
+        minimizing SLA breach risks through proactive resolution tracking. Built weekly status reports
+        adopted by resources and consultants in recurring meetings, and collaborated directly with
+        <span style="color:#d4d4d4;">foreign consultants</span> to resolve complex cross-account cases faster.
       </div>
       <div class="tag-grid">
         <span class="tag ty2">SAP</span>
         <span class="tag tb">SQL</span>
+        <span class="tag tb">ERP</span>
         <span class="tag tt">Data Migration</span>
-        <span class="tag tg">ERP</span>
+        <span class="tag tt">Data Visualization</span>
+        <span class="tag to">SLA Management</span>
         <span class="tag to">Business Analysis</span>
+        <span class="tag tg">Business Process Analysis</span>
+        <span class="tag tp">Reporting</span>
+        <span class="tag tp">Cross-team Collaboration</span>
       </div>
-      <!-- Marquee scrolls on hover — duplicate the text so it loops seamlessly -->
-      <small class="tl-skills"><span>
-        ERP System Configuration &amp; Support • Business Requirements Analysis • SQL &amp; Database Management • Data Migration • Business Process Analysis •&nbsp;&nbsp;&nbsp;
-        ERP System Configuration &amp; Support • Business Requirements Analysis • SQL &amp; Database Management • Data Migration • Business Process Analysis •
-      </span></small>
     </div>
 
-    <!-- ── JOB 2 ── -->
+    <!-- FLYHUB -->
     <div class="tl-item">
       <div class="tl-dot"></div>
       <img src="/images/logoflyhub.jpg" alt="Flyhub" class="tl-logo" onerror="this.style.display='none'"/>
       <div class="tl-co">FLYHUB DIGITAL</div>
-      <div class="tl-role">Junior Software Engineer, QA Intern</div>
-      <span class="tl-period">📅 Jul 2025 – Sep 2025 · Internship</span>
+      <div class="tl-role">Junior Software Engineer & QA Intern</div>
+      <span class="tl-period">Jul 2025 – Sep 2025 · Internship</span>
       <div class="tl-desc">
-        Delivered scalable web applications by developing HTML/PHP apps, managing databases, testing with
-        VS Code and Postman, and collaborating with developers, resulting in optimized performance,
-        faster testing, and reliable releases.
+        Contributed to <span style="color:#d4d4d4;">3 live client projects</span>, building customized invoice
+        generation systems tailored to each company's specific business needs using PHP and MySQL.
+        Handled <span style="color:#d4d4d4;">AWS deployment</span> for production releases — gaining real DevOps
+        experience in cloud delivery pipelines. Also served as QA on Flyhub's main website, catching
+        and resolving bugs to ensure a polished, error-free experience for end users.
       </div>
       <div class="tag-grid">
         <span class="tag tb">HTML</span>
         <span class="tag tb">CSS</span>
+        <span class="tag tb">VS Code</span>
         <span class="tag ty2">PHP</span>
-        <span class="tag to">Postman</span>
+        <span class="tag ty2">Laragon</span>
+        <span class="tag tg">MySQL</span>
         <span class="tag tg">PhpMyAdmin</span>
-        <span class="tag tp">CRM</span>
+        <span class="tag tg">CRM</span>
+        <span class="tag tt">AWS</span>
+        <span class="tag to">Postman API</span>
+        <span class="tag tp">QA Testing</span>
+        <span class="tag tp">Invoice Systems</span>
       </div>
-      <small class="tl-skills"><span>
-        HTML • CSS • PHP • Laragon • Postman API • PhpMyAdmin • VS Code • CRM •&nbsp;&nbsp;&nbsp;
-        HTML • CSS • PHP • Laragon • Postman API • PhpMyAdmin • VS Code • CRM •
-      </span></small>
     </div>
 
-    <!-- ── JOB 3 ── -->
+    <!-- BATSTATEU -->
     <div class="tl-item">
       <div class="tl-dot"></div>
       <img src="/images/logobsu.jpg" alt="BatStateU" class="tl-logo" onerror="this.style.display='none'"/>
       <div class="tl-co">BATSTATEU ACTION CENTER</div>
       <div class="tl-role">Junior Full-Stack Developer</div>
-      <span class="tl-period">📅 Jan 2025 – Mar 2025 · Contract</span>
+      <span class="tl-period">Jan 2025 – Mar 2025 · Academic Internship</span>
       <div class="tl-desc">
-        Developed full-stack GIS applications using React, Vite, Tailwind CSS, and Leaflet, integrating
-        Google Drive API and Supabase for efficient data management and enhanced user experience.
+        Built a <span style="color:#d4d4d4;">real-time GIS extension</span> for BatStateU's main website that
+        ingests satellite-captured FMA data and plots it live on an interactive map — giving the university
+        a live geospatial view of field data without manual updates. Integrated directly into the
+        university's existing web infrastructure using React, Leaflet, and Supabase.
       </div>
       <div class="tag-grid">
         <span class="tag tb">React.js</span>
+        <span class="tag tb">Google Drive API</span>
         <span class="tag tt">Vite</span>
         <span class="tag tt">Tailwind CSS</span>
+        <span class="tag tt">Real-time Mapping</span>
         <span class="tag tg">Leaflet</span>
+        <span class="tag tg">GIS</span>
+        <span class="tag tg">Satellite Data</span>
         <span class="tag to">Supabase</span>
-        <span class="tag ty2">GIS</span>
+        <span class="tag to">Data Management</span>
       </div>
-      <small class="tl-skills"><span>
-        React.js • Vite • Tailwind CSS • Leaflet • Google Drive API • Supabase • GIS • Data Management •&nbsp;&nbsp;&nbsp;
-        React.js • Vite • Tailwind CSS • Leaflet • Google Drive API • Supabase • GIS • Data Management •
-      </span></small>
     </div>
 
-    <!-- ── JOB 4 ── -->
+    <!-- FREELANCE DEV -->
     <div class="tl-item">
       <div class="tl-dot"></div>
-      <div class="tl-co">FREELANCE PROGRAMMER</div>
-      <div class="tl-role">Python &amp; Java Developer</div>
-      <span class="tl-period">📅 Jan 2021 – Jan 2025 · Freelance</span>
+      <div class="tl-co">DEVELOPER</div>
+      <div class="tl-role">Python, Java, & Embedded Systems</div>
+      <span class="tl-period">Jan 2021 – Jan 2025 · Freelance</span>
       <div class="tl-desc">
-        Developed and delivered 15+ Python and Java front-end, back-end, and full-stack GUI applications,
-        ensuring functionality, user experience, and on-time delivery.
+        Delivered <span style="color:#d4d4d4;">15+ software projects</span> across Python and Java — covering
+        front-end GUIs, back-end systems, and full-stack desktop applications for various clients.
+        Also built embedded solutions using microcontrollers and microprocessors,
+        programming in C/C++ and configuring Linux environments for real-world automation and IoT use cases.
       </div>
       <div class="tag-grid">
         <span class="tag tg">Python</span>
+        <span class="tag tg">Raspberry Pi</span>
         <span class="tag tb">Java</span>
+        <span class="tag tb">NetBeans</span>
         <span class="tag ty2">SQL</span>
-        <span class="tag to">XAMPP</span>
-        <span class="tag tp">GUI</span>
+        <span class="tag ty2">XAMPP</span>
+        <span class="tag ty2">PyCharm</span>
+        <span class="tag to">C / C++</span>
+        <span class="tag to">GUI Development</span>
+        <span class="tag tr">ESP32</span>
+        <span class="tag tr">Arduino</span>
+        <span class="tag tp">Linux</span>
+        <span class="tag tp">IoT</span>
+        <span class="tag tt">Automation</span>
       </div>
-      <small class="tl-skills"><span>
-        XAMPP • SQL • NetBeans • PyCharm • Python • Java • GUI • Full-Stack Development •&nbsp;&nbsp;&nbsp;
-        XAMPP • SQL • NetBeans • PyCharm • Python • Java • GUI • Full-Stack Development •
-      </span></small>
     </div>
 
-    <!-- ── JOB 5 ── -->
+    <!-- FREELANCE UI/UX -->
     <div class="tl-item">
       <div class="tl-dot"></div>
-      <div class="tl-co">FREELANCE UI / UX DESIGNER</div>
-      <div class="tl-role">Front-End &amp; Interface Design</div>
-      <span class="tl-period">📅 Aug 2024 – Jan 2025 · Freelance</span>
+      <div class="tl-co">UI / UX DESIGNER</div>
+      <div class="tl-role">Front-End & Interface Design</div>
+      <span class="tl-period">Aug 2024 – Jan 2025 · Freelance</span>
       <div class="tl-desc">
-        Designed 3+ user-centered interfaces using Figma and Adobe XD, conducting user research and
-        testing to deliver responsive, visually appealing layouts for diverse clients.
+        Designed <span style="color:#d4d4d4;">3+ user-centered interfaces</span> using Figma and Adobe XD,
+        conducting user research to ensure layouts were intuitive and visually polished.
+        Delivered responsive designs for diverse clients, bridging the gap between
+        aesthetics and usability.
       </div>
       <div class="tag-grid">
         <span class="tag tp">Figma</span>
         <span class="tag tb">Adobe XD</span>
         <span class="tag tt">Canva</span>
-        <span class="tag tg">Front-End</span>
+        <span class="tag tg">User Research</span>
+        <span class="tag to">Responsive Design</span>
+        <span class="tag ty2">Front-End Development</span>
       </div>
-      <small class="tl-skills"><span>
-        Adobe XD • Figma • Canva • Front-End Development •&nbsp;&nbsp;&nbsp;
-        Adobe XD • Figma • Canva • Front-End Development •
-      </span></small>
     </div>
 
   </div><!-- /timeline -->
+  <span class="punc">}</span>
 
 </section>
 <!-- ============================================================
@@ -891,37 +1074,91 @@ textarea.form-input { resize: vertical; min-height: 90px; }
     <div class="proj-cat-title">// AI Projects</div>
     <div class="proj-grid">
 
+      <!-- CODESPOTLIGHT -->
       <div class="proj-card">
-        <img src="/gifs/codespotlightdemo.gif" alt="LLM"
+        <img src="/gifs/codespotlightdemo.gif" alt="CodeSpotlight"
              onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🤖</text></svg>'"/>
         <div class="proj-card-body">
-          <h4>🤖 LLM Engineering Projects</h4>
-          <p>AI scraping tools, chatbot interfaces, and automation workflows.</p>
+          <h4>CodeSpotlight</h4>
+          <p>AI that scans any GitHub repo and surfaces architecture, patterns, and risks — no senior dev needed to explain unfamiliar code.</p>
+          <div class="tag-grid" style="margin-top:7px;">
+            <span class="tag tb">LLM</span>
+            <span class="tag tg">FastAPI</span>
+            <span class="tag tt">RAG</span>
+            <span class="tag ty2">GitHub API</span>
+            <span class="tag tp">OpenAI</span>
+          </div>
+          <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+            <a href="https://github.com/engr-rpdj/CodeSpotlightv1" target="_blank"
+               style="display:inline-flex; align-items:center; gap:5px; padding:3px 9px; background:#252526; border:1px solid #3c3c3c; border-radius:3px; color:#d4d4d4; text-decoration:none; font-size:10.5px; font-family:'Fira Code',monospace;"
+               onmouseover="this.style.borderColor='#569cd6';this.style.color='#569cd6'"
+               onmouseout="this.style.borderColor='#3c3c3c';this.style.color='#d4d4d4'">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+              repo
+            </a>
+            <a href="https://codespotlightv1-production.up.railway.app/" target="_blank"
+               style="display:inline-flex; align-items:center; gap:5px; padding:3px 9px; background:#0a1f1a; border:1px solid #1e4a3d; border-radius:3px; color:#4ec9b0; text-decoration:none; font-size:10.5px; font-family:'Fira Code',monospace;"
+               onmouseover="this.style.background='#0d2a20';this.style.borderColor='#4ec9b0'"
+               onmouseout="this.style.background='#0a1f1a';this.style.borderColor='#1e4a3d'">
+              ↗ try it live
+            </a>
+          </div>
         </div>
       </div>
 
+      <!-- SHIRT SIZE DETECTION -->
       <div class="proj-card">
         <img src="/images/shirt.jpg" alt="Shirt Detection"
              onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🧠</text></svg>'"/>
         <div class="proj-card-body">
-          <h4>🧠 Shirt Size Detection</h4>
-          <p>Computer vision system using OpenCV &amp; Python.</p>
+          <h4>👕 Shirt Size Detection</h4>
+          <p>Computer vision system that detects shirt size from body measurements using OpenCV and Python.</p>
+          <div class="tag-grid" style="margin-top:7px;">
+            <span class="tag tg">Python</span>
+            <span class="tag tt">OpenCV</span>
+            <span class="tag tp">Computer Vision</span>
+          </div>
+          <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+            <a href="https://github.com/YOUR_USERNAME/shirt-detection" target="_blank"
+               style="display:inline-flex; align-items:center; gap:5px; padding:3px 9px; background:#252526; border:1px solid #3c3c3c; border-radius:3px; color:#d4d4d4; text-decoration:none; font-size:10.5px; font-family:'Fira Code',monospace;"
+               onmouseover="this.style.borderColor='#569cd6';this.style.color='#569cd6'"
+               onmouseout="this.style.borderColor='#3c3c3c';this.style.color='#d4d4d4'">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+              repo
+            </a>
+          </div>
         </div>
       </div>
 
+      <!-- AI AUTOMATION -->
       <div class="proj-card">
         <img src="/images/ai-automation.jpg" alt="AI Automation"
              onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🧩</text></svg>'"/>
         <div class="proj-card-body">
           <h4>🧩 AI Automation Tools</h4>
-          <p>LLM powered automation pipelines and API integrations.</p>
+          <p>LLM-powered automation pipelines and API integrations that eliminate repetitive workflows.</p>
+          <div class="tag-grid" style="margin-top:7px;">
+            <span class="tag tg">Python</span>
+            <span class="tag tb">LangChain</span>
+            <span class="tag to">FastAPI</span>
+            <span class="tag tt">OpenAI API</span>
+          </div>
+          <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+            <a href="https://github.com/YOUR_USERNAME/ai-automation" target="_blank"
+               style="display:inline-flex; align-items:center; gap:5px; padding:3px 9px; background:#252526; border:1px solid #3c3c3c; border-radius:3px; color:#d4d4d4; text-decoration:none; font-size:10.5px; font-family:'Fira Code',monospace;"
+               onmouseover="this.style.borderColor='#569cd6';this.style.color='#569cd6'"
+               onmouseout="this.style.borderColor='#3c3c3c';this.style.color='#d4d4d4'">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+              repo
+            </a>
+          </div>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- ══ WEB APP PROJECTS ══ -->
+  <!-- ══ WEB APP PROJECTS ══
   <div class="proj-cat">
     <div class="proj-cat-title">// Web App Projects</div>
     <div class="proj-grid">
@@ -954,17 +1191,17 @@ textarea.form-input { resize: vertical; min-height: 90px; }
       </div>
 
     </div>
-  </div>
+  </div> -->
 
   <!-- ══ COMPUTER VISION ══ -->
   <div class="proj-cat">
     <div class="proj-cat-title">// Computer Vision Projects</div>
     <div class="proj-grid">
 
-      <div class="proj-card"><img src="/imagescv/cvsmartbuoy.gif"  alt="CV" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>👕</text></svg>'"/><div class="proj-card-body"><h4>👕 Shirt Size Detection</h4><p>OpenCV based clothing size detection.</p></div></div>
-      <div class="proj-card"><img src="/imagescv/cvbuoyvid.gif"    alt="Track" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🛰</text></svg>'"/><div class="proj-card-body"><h4>🛰 Vision Tracking</h4><p>Object tracking using computer vision.</p></div></div>
-      <div class="proj-card"><img src="/imagescv/0307.gif"         alt="Classify" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23ce9178%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📷</text></svg>'"/><div class="proj-card-body"><h4>📷 Image Classification</h4><p>Deep learning image classifier.</p></div></div>
-      <div class="proj-card"><img src="/imagescv/cvfirevid.gif"    alt="Fire"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23f44747%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🔥</text></svg>'"/><div class="proj-card-body"><h4>🔥 Fire Detection</h4><p>Real-time fire/smoke detection system.</p></div></div>
+      <div class="proj-card"><img src="/imagescv/cvsmartbuoy.gif"  alt="CV" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>👕</text></svg>'"/><div class="proj-card-body"><h4>Smart Buoy Drowning Detection (Metrics)</h4><p>Achieved <span style="color:#d4d4d4;">93%</span> detection accuracy — a <span style="color:#d4d4d4;">pioneering result</span>, as no comparable system has been deployed in open sea environments locally or internationally, with existing solutions limited to controlled indoor pools.</p></div></div>
+      <div class="proj-card"><img src="/imagescv/cvbuoyvid.gif"    alt="Track" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🛰</text></svg>'"/><div class="proj-card-body"><h4>Smart Buoy Drowning Detection</h4><p>Detects person movement via the Smart Buoy hardware, then counter-checks through an <span style="color:#d4d4d4;">AI-powered camera with 93% accuracy</span>, automatically sending drowning alerts to lifeguards up to <span style="color:#d4d4d4;">20 meters away</span> — even when they are off-shore.</p></div></div>
+      <div class="proj-card"><img src="/imagescv/0307.gif"         alt="Classify" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23ce9178%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📷</text></svg>'"/><div class="proj-card-body"><h4>Fire & Smoke Detection (Metrics)</h4><p>Trained on a dataset of <span style="color:#d4d4d4;">30,000 images</span>, the model achieved <span style="color:#d4d4d4;">95%</span> detection accuracy — validated across diverse fire and smoke scenarios to ensure reliable real-world performance.</p></div></div>
+      <div class="proj-card"><img src="/imagescv/cvfirevid.gif"    alt="Fire"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23f44747%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🔥</text></svg>'"/><div class="proj-card-body"><h4>Fire & Smoke Detection</h4><p>Serves as a <span style="color:#d4d4d4;">computer vision counter-checker</span> via webcam, <span style="color:#d4d4d4;">cross-validating</span> hardware sensor alerts to eliminate false positives — confirming fire and smoke detection with <span style="color:#d4d4d4;">95% accuracy</span> before triggering emergency responses.</p></div></div>
 
     </div>
   </div>
@@ -974,13 +1211,13 @@ textarea.form-input { resize: vertical; min-height: 90px; }
     <div class="proj-cat-title">// Embedded Projects</div>
     <div class="proj-grid">
 
-      <div class="proj-card"><img src="/imagesemb/sierra.jpeg" alt="Boat"   onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🚤</text></svg>'"/><div class="proj-card-body"><h4>🚤 Autonomous Boat</h4><p>Obstacle avoidance using ultrasonic sensors.</p></div></div>
-      <div class="proj-card"><img src="/imagesemb/fp.png"      alt="Water"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🌊</text></svg>'"/><div class="proj-card-body"><h4>🌊 Water Monitoring</h4><p>Turbidity sensor based water quality monitoring.</p></div></div>
-      <div class="proj-card"><img src="/imagesemb/car.jpeg"    alt="Sensor" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>⚙️</text></svg>'"/><div class="proj-card-body"><h4>⚙️ Sensor Integration</h4><p>Embedded system integrating multiple sensors.</p></div></div>
-      <div class="proj-card"><img src="/imagesemb/egg.jpeg"    alt="IoT"    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📡</text></svg>'"/><div class="proj-card-body"><h4>📡 IoT Monitoring</h4><p>Remote telemetry monitoring system.</p></div></div>
-      <div class="proj-card"><img src="/imagesemb/irrig.png"   alt="Irrig"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🌱</text></svg>'"/><div class="proj-card-body"><h4>🌱 Irrigation System</h4><p>Automated smart irrigation controller.</p></div></div>
-      <div class="proj-card"><img src="/imagesemb/fire.jpeg"   alt="Fire"   onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23f44747%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🔥</text></svg>'"/><div class="proj-card-body"><h4>🔥 Fire Sensor</h4><p>Embedded fire &amp; gas detection unit.</p></div></div>
-      <div class="proj-card"><img src="/imagesemb/canal.png"   alt="Canal"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🏞</text></svg>'"/><div class="proj-card-body"><h4>🏞 Canal Monitoring</h4><p>Remote canal water level monitoring.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/sierra.jpeg" alt="Boat"   onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🚤</text></svg>'"/><div class="proj-card-body"><h4>Multi-Threat Forest Monitoring System</h4><p><span style="color:#d4d4d4;">IoT sensor network and web dashboard</span> that detects and monitors illegal quarrying, logging, deforestation, and mining activity across <span style="color:#d4d4d4;">Sierra Madre in real time</span>.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/fp.png"      alt="Water"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🌊</text></svg>'"/><div class="proj-card-body"><h4>Patient & Visitor Logging System</h4><p>Hardware-integrated clinic management system that enables nurses to log patient and visitor information through a seamless <span style="color:#d4d4d4;">web interface</span> and <span style="color:#d4d4d4;">unique id</span> using fingerprint.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/car.jpeg"    alt="Sensor" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>⚙️</text></svg>'"/><div class="proj-card-body"><h4>Logic Gate Autonomous Car Kit</h4><p>A fully functional autonomous car built purely from logic gates, counters, and <span style="color:#d4d4d4;">Integrated Ciruits</span> — no microcontroller or microprocessor, just raw <span style="color:#d4d4d4;">digital circuit design</span>.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/egg.jpeg"    alt="IoT"    onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>📡</text></svg>'"/><div class="proj-card-body"><h4>Intelligent Egg Sorting System</h4><p>Weight-based egg sorting system that classifies eggs by <span style="color:#d4d4d4;">mass rather than appearance</span>, delivering more accurate and <span style="color:#d4d4d4;">consistent grading</span> than traditional optical sorters.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/irrig.png"   alt="Irrig"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🌱</text></svg>'"/><div class="proj-card-body"><h4>Smart Greenhouse Irrigation & Security System</h4><p>Automated greenhouse system that controls sprinklers based on weather, time, and temperature, with access control security and a mobile app for manual override and maintenance.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/fire.jpeg"   alt="Fire"   onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23f44747%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🔥</text></svg>'"/><div class="proj-card-body"><h4>AI Fire & Smoke Detection System</h4><p>Computer vision-powered fire and smoke detection system with <span style="color:#d4d4d4;">real-time</span> dashboard monitoring, alert validation, and <span style="color:#d4d4d4;">automatic GPS location</span> dispatch to firefighters.</p></div></div>
+      <div class="proj-card"><img src="/imagesemb/canal.png"   alt="Canal"  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23252526%22 width=%22200%22 height=%22120%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🏞</text></svg>'"/><div class="proj-card-body"><h4>Smart Flood Prevention & Water Recycling System</h4><p>Drainage monitoring system that <span style="color:#d4d4d4;">prevents flood-causing</span> trash buildup, with a <span style="color:#d4d4d4;">rainwater recycling</span> feature that mists roads during high-temperature conditions to cool urban surfaces.</p></div></div>
 
     </div>
   </div>
@@ -1043,95 +1280,341 @@ textarea.form-input { resize: vertical; min-height: 90px; }
      Hover a card to flip it and reveal the description.
      To add a card: copy a .flip-card block, update content.
      ============================================================ -->
-<section id="competitions" class="section-block">
+<section id="hackathons" class="section-block">
 
   <div class="section-label">
     <span class="label-icon">🏆</span>
-    <span class="label-name">competitions<span>.tsx</span></span>
+    <span class="label-name">hackathons<span>.tsx</span></span>
   </div>
 
-  <div class="s-cm cb">// src/components/Competitions.tsx — hover a card to flip</div><br>
+  <div class="s-cm cb">// src/components/Hackathons.tsx — click a card to expand</div><br>
   <div class="cb" style="margin-bottom:16px">
-    <span class="kw">export default function</span> <span class="fn">Competitions</span><span class="punc">() {</span>
+    <span class="kw">export default function</span> <span class="fn">Hackathons</span><span class="punc">() {</span>
   </div>
 
-  <div class="comp-grid">
+  <style>
+  .hk-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 960px;
+    align-items: start;
+  }
+  @media (max-width: 720px) { .hk-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .hk-grid { grid-template-columns: 1fr; } }
 
-    <div class="flip-card"><div class="flip-inner">
-      <div class="flip-front">
-        <img src="/images/codespotlight.jpg" alt="DXC" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22160%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🤖</text></svg>'"/>
-        <div class="flip-front-title">DXC Techno-thon'26: Gen AI Innovation Challenge</div>
-      </div>
-      <div class="flip-back">
-        <h3>DXC Techno-thon'26: The Gen AI Innovation Challenge</h3>
-        <h4>CodeSpotlight · Candidate, 2026</h4>
-        <p>Developed an AI system that scans GitHub repositories and generates summaries for technical and non-technical users.</p>
-      </div>
-    </div></div>
+  .hk-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: border-color .2s;
+    cursor: pointer;
+  }
+  .hk-card.open { border-color: #569cd6; }
+  .hk-card:hover { border-color: #555; }
 
-    <div class="flip-card"><div class="flip-inner">
-      <div class="flip-front">
-        <img src="/images/stm32.jpg" alt="STM32" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22160%22><rect fill=%22%231a0a1e%22 width=%22300%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🔩</text></svg>'"/>
-        <div class="flip-front-title">STMicroelectronics: STM32 Innovation Hackathon</div>
-      </div>
-      <div class="flip-back">
-        <h3>STMicroelectronics: STM32 Innovation Hackathon</h3>
-        <h4>Semifinalist, 2025</h4>
-        <p>Configured and programmed the STM32 microcontroller under time pressure, strengthening embedded systems and rapid problem-solving skills.</p>
-      </div>
-    </div></div>
+  /* Image container with overlay title */
+  .hk-img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
 
-    <div class="flip-card"><div class="flip-inner">
-      <div class="flip-front">
-        <img src="/images/techtopia.jpg" alt="Techtopia" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22160%22><rect fill=%22%230a1f1a%22 width=%22300%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🌊</text></svg>'"/>
-        <div class="flip-front-title">Techtopia: An Exhibition of Innovation</div>
-      </div>
-      <div class="flip-back">
-        <h3>Techtopia: An Exhibition of Innovation</h3>
-        <h4>City-wide Aqua Network with Active Linkage · Finalist, 2024</h4>
-        <p>Designed a smart city water management prototype integrating hardware and software.</p>
-      </div>
-    </div></div>
+  .hk-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    background: #111;
+    transition: transform .3s;
+  }
+  .hk-card:hover .hk-thumb { transform: scale(1.03); }
 
-    <div class="flip-card"><div class="flip-inner">
-      <div class="flip-front">
-        <img src="/images/3dcollage.jpg" alt="Nuzlocke" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22160%22><rect fill=%22%231e1c07%22 width=%22300%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🏆</text></svg>'"/>
-        <div class="flip-front-title">Nuzlocke: 3D Collage</div>
-      </div>
-      <div class="flip-back">
-        <h3>Nuzlocke: 3D Collage</h3>
-        <h4>Champion 🥇, 2024</h4>
-        <p>Created a technically symbolic 3D collage blending creativity and engineering.</p>
-      </div>
-    </div></div>
+  /* Gradient overlay at bottom of image */
+  .hk-img-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    padding: 28px 12px 10px;
+  }
 
-    <div class="flip-card"><div class="flip-inner">
-      <div class="flip-front">
-        <img src="/images/designsprint.jpg" alt="CpElympics" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22160%22><rect fill=%22%23211007%22 width=%22300%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23ce9178%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🌊</text></svg>'"/>
-        <div class="flip-front-title">CpElympics: Design Sprint</div>
-      </div>
-      <div class="flip-back">
-        <h3>CpElympics: Design Sprint</h3>
-        <h4>OIL AWAY! · 2nd Place 🥈, 2023</h4>
-        <p>Rapidly ideated and prototyped an oil spill cleaning and containment system.</p>
-      </div>
-    </div></div>
+  .hk-overlay-title {
+    color: #dcdcaa;
+    font-size: 11.5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 5px;
+  }
 
-    <div class="flip-card"><div class="flip-inner">
-      <div class="flip-front">
-        <img src="/images/robothon.jpg" alt="Robothon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22160%22><rect fill=%22%230a1f1a%22 width=%22300%22 height=%22160%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🤖</text></svg>'"/>
-        <div class="flip-front-title">ICpEP.se CpE Challenge: Robothon</div>
-      </div>
-      <div class="flip-back">
-        <h3>ICpEP.se CpE Challenge: Robothon</h3>
-        <h4>Sustainable AgroBot · Candidate, 2023</h4>
-        <p>Developed a dual-powered autonomous robot to automate irrigation and improve soil arability.</p>
-      </div>
-    </div></div>
+  .hk-overlay-sub {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
 
-  </div><!-- /comp-grid -->
+  .hk-year {
+    color: rgba(255,255,255,0.6);
+    font-size: 10px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  .hk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-family: 'Fira Code', monospace;
+    font-weight: 600;
+  }
+  .hk-champion  { background:#1e1c07; color:#dcdcaa; border:1px solid #4a4510; }
+  .hk-winner    { background:#1e0a07; color:#ce9178; border:1px solid #5a2010; }
+  .hk-finalist  { background:#0a1f1a; color:#4ec9b0; border:1px solid #1e4a3d; }
+  .hk-semi      { background:#160a1e; color:#c586c0; border:1px solid #3d2050; }
+  .hk-candidate { background:#0d2035; color:#569cd6; border:1px solid #2a4a6b; }
+
+  /* Expand hint */
+  .hk-hint {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 12px;
+    border-top: 1px solid var(--border);
+  }
+  .hk-hint-text {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: 'Fira Code', monospace;
+  }
+  .hk-chevron {
+    color: var(--text-dim);
+    font-size: 10px;
+    transition: transform .25s;
+    font-family: monospace;
+  }
+  .hk-card.open .hk-chevron { transform: rotate(180deg); }
+
+  /* Expanded body */
+  .hk-body {
+    display: none;
+    padding: 12px 14px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .hk-card.open .hk-body { display: block; }
+  .hk-card.open .hk-hint-text { color: #569cd6; }
+
+  .hk-desc {
+    color: #a0a0a0;
+    font-size: 11.5px;
+    line-height: 1.8;
+    margin-bottom: 10px;
+  }
+  .hk-desc span { color: #d4d4d4; }
+  </style>
+
+  <div class="hk-grid">
+
+    <!-- DXC -->
+    <div class="hk-card" onclick="toggleHk(this)">
+      <div class="hk-img-wrap">
+        <img class="hk-thumb" src="/images/codespotlight.jpg" alt="DXC"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22188%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22188%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🤖</text></svg>'"/>
+        <div class="hk-img-overlay">
+          <div class="hk-overlay-title">DXC Techno-thon'26: Gen AI Innovation Challenge</div>
+          <div class="hk-overlay-sub">
+            <span class="hk-year">📅 2026</span>
+            <span class="hk-badge hk-candidate">Candidate</span>
+          </div>
+        </div>
+      </div>
+      <div class="hk-hint">
+        <span class="hk-hint-text">// click to expand</span>
+        <span class="hk-chevron">▼</span>
+      </div>
+      <div class="hk-body">
+        <div class="hk-desc">
+          Built <span>CodeSpotlight</span> — an AI system that scans any GitHub repository and generates summaries for both technical and non-technical users, with an interactive chat for deep-diving into the codebase. <span>No senior dev needed to onboard on unfamiliar code.</span>
+        </div>
+        <div class="tag-grid">
+          <span class="tag tb">LLM</span>
+          <span class="tag tg">FastAPI</span>
+          <span class="tag tt">RAG</span>
+          <span class="tag ty2">GitHub API</span>
+          <span class="tag tp">OpenAI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STM32 -->
+    <div class="hk-card" onclick="toggleHk(this)">
+      <div class="hk-img-wrap">
+        <img class="hk-thumb" src="/images/stm32.jpg" alt="STM32"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22188%22><rect fill=%22%231a0a1e%22 width=%22300%22 height=%22188%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🔩</text></svg>'"/>
+        <div class="hk-img-overlay">
+          <div class="hk-overlay-title">STMicroelectronics: STM32 Innovation Hackathon</div>
+          <div class="hk-overlay-sub">
+            <span class="hk-year">📅 2025</span>
+            <span class="hk-badge hk-semi">Semifinalist</span>
+          </div>
+        </div>
+      </div>
+      <div class="hk-hint">
+        <span class="hk-hint-text">// click to expand</span>
+        <span class="hk-chevron">▼</span>
+      </div>
+      <div class="hk-body">
+        <div class="hk-desc">
+          Configured and programmed the <span>STM32 microcontroller</span> under time pressure, designing an embedded solution that demonstrated rapid problem-solving and <span>deep familiarity with embedded systems</span> in a competitive setting.
+        </div>
+        <div class="tag-grid">
+          <span class="tag tr">STM32</span>
+          <span class="tag to">C / C++</span>
+          <span class="tag tt">Embedded Systems</span>
+          <span class="tag ty2">Microcontroller</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Techtopia -->
+    <div class="hk-card" onclick="toggleHk(this)">
+      <div class="hk-img-wrap">
+        <img class="hk-thumb" src="/images/techtopia.jpg" alt="Techtopia"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22188%22><rect fill=%22%230a1f1a%22 width=%22300%22 height=%22188%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🌊</text></svg>'"/>
+        <div class="hk-img-overlay">
+          <div class="hk-overlay-title">Techtopia: An Exhibition of Innovation</div>
+          <div class="hk-overlay-sub">
+            <span class="hk-year">📅 2024</span>
+            <span class="hk-badge hk-finalist">Finalist</span>
+          </div>
+        </div>
+      </div>
+      <div class="hk-hint">
+        <span class="hk-hint-text">// click to expand</span>
+        <span class="hk-chevron">▼</span>
+      </div>
+      <div class="hk-body">
+        <div class="hk-desc">
+          Designed <span>City-wide Aqua Network with Active Linkage</span> — a smart city water management prototype that integrated hardware sensors and a software dashboard to monitor and manage water systems across a city network in real time.
+        </div>
+        <div class="tag-grid">
+          <span class="tag tt">IoT</span>
+          <span class="tag tg">Hardware</span>
+          <span class="tag tb">Dashboard</span>
+          <span class="tag ty2">Smart City</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nuzlocke -->
+    <div class="hk-card" onclick="toggleHk(this)">
+      <div class="hk-img-wrap">
+        <img class="hk-thumb" src="/images/3dcollage.jpg" alt="Nuzlocke"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22188%22><rect fill=%22%231e1c07%22 width=%22300%22 height=%22188%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🏆</text></svg>'"/>
+        <div class="hk-img-overlay">
+          <div class="hk-overlay-title">Nuzlocke: 3D Collage</div>
+          <div class="hk-overlay-sub">
+            <span class="hk-year">📅 2024</span>
+            <span class="hk-badge hk-champion">🥇 Champion</span>
+          </div>
+        </div>
+      </div>
+      <div class="hk-hint">
+        <span class="hk-hint-text">// click to expand</span>
+        <span class="hk-chevron">▼</span>
+      </div>
+      <div class="hk-body">
+        <div class="hk-desc">
+          Created a <span>technically symbolic 3D collage</span> that blended creative storytelling with engineering concepts — won Champion out of all entries, demonstrating an ability to merge <span>artistic vision with technical execution.</span>
+        </div>
+        <div class="tag-grid">
+          <span class="tag tp">3D Modeling</span>
+          <span class="tag ty2">Design</span>
+          <span class="tag tg">Creative Engineering</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CpElympics -->
+    <div class="hk-card" onclick="toggleHk(this)">
+      <div class="hk-img-wrap">
+        <img class="hk-thumb" src="/images/designsprint.jpg" alt="CpElympics"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22188%22><rect fill=%22%23211007%22 width=%22300%22 height=%22188%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23ce9178%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🥈</text></svg>'"/>
+        <div class="hk-img-overlay">
+          <div class="hk-overlay-title">CpElympics: Design Sprint</div>
+          <div class="hk-overlay-sub">
+            <span class="hk-year">📅 2023</span>
+            <span class="hk-badge hk-winner">🥈 2nd Place</span>
+          </div>
+        </div>
+      </div>
+      <div class="hk-hint">
+        <span class="hk-hint-text">// click to expand</span>
+        <span class="hk-chevron">▼</span>
+      </div>
+      <div class="hk-body">
+        <div class="hk-desc">
+          Rapidly ideated and prototyped <span>OIL AWAY!</span> — an oil spill cleaning and containment system designed under sprint conditions. Placed 2nd, demonstrating <span>fast prototyping and engineering problem-solving</span> under pressure.
+        </div>
+        <div class="tag-grid">
+          <span class="tag tg">Prototyping</span>
+          <span class="tag tb">Design Sprint</span>
+          <span class="tag to">Problem Solving</span>
+          <span class="tag tt">Hardware Design</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Robothon -->
+    <div class="hk-card" onclick="toggleHk(this)">
+      <div class="hk-img-wrap">
+        <img class="hk-thumb" src="/images/robothon.jpg" alt="Robothon"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22188%22><rect fill=%22%230a1f1a%22 width=%22300%22 height=%22188%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2256%22>🤖</text></svg>'"/>
+        <div class="hk-img-overlay">
+          <div class="hk-overlay-title">ICpEP.se CpE Challenge: Robothon</div>
+          <div class="hk-overlay-sub">
+            <span class="hk-year">📅 2023</span>
+            <span class="hk-badge hk-candidate">Candidate</span>
+          </div>
+        </div>
+      </div>
+      <div class="hk-hint">
+        <span class="hk-hint-text">// click to expand</span>
+        <span class="hk-chevron">▼</span>
+      </div>
+      <div class="hk-body">
+        <div class="hk-desc">
+          Developed <span>Sustainable AgroBot</span> — a dual-powered autonomous robot designed to automate irrigation and improve soil arability. Built with <span>embedded systems</span> for autonomous navigation.
+        </div>
+        <div class="tag-grid">
+          <span class="tag tg">Robotics</span>
+          <span class="tag to">Arduino</span>
+          <span class="tag tt">IoT</span>
+          <span class="tag ty2">Automation</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <br>
+  <div class="cb" style="margin-top:16px;">
+    <span class="punc">}</span>
+  </div>
 
 </section>
+
+<script>
+function toggleHk(card) {
+  const isOpen = card.classList.contains('open');
+  document.querySelectorAll('.hk-card.open').forEach(c => c.classList.remove('open'));
+  if (!isOpen) card.classList.add('open');
+}
+</script>
 <!-- ============================================================
      sections/skills.html
      Add/remove <span class="tag XX"> inside each .tag-grid.
@@ -1150,90 +1633,197 @@ textarea.form-input { resize: vertical; min-height: 90px; }
     <span class="kw">export default function</span> <span class="fn">Skills</span><span class="punc">() {</span>
   </div>
 
-  <!-- ── Languages ── -->
-  <div class="sk-section">
-    <div class="sk-title">// Languages</div>
-    <div class="tag-grid">
-      <span class="tag tg">Python</span>
-      <span class="tag tb">JavaScript</span>
-      <span class="tag tb">Java</span>
-      <span class="tag ty2">PHP</span>
-      <span class="tag to">C / C++</span>
-      <span class="tag ty2">SQL</span>
-      <span class="tag tt">HTML / CSS</span>
+  <!-- Terminal window -->
+  <div id="skillsTerminal" style="background:#1e1e1e; border:1px solid #3c3c3c; border-radius:4px; overflow:hidden; max-width:760px; height:460px;">
+
+    <!-- Terminal title bar -->
+    <div style="background:#2d2d2d; padding:8px 14px; display:flex; align-items:center; gap:8px; border-bottom:1px solid #3c3c3c;">
+      <div style="width:10px;height:10px;border-radius:50%;background:#ff5f57;"></div>
+      <div style="width:10px;height:10px;border-radius:50%;background:#febc2e;"></div>
+      <div style="width:10px;height:10px;border-radius:50%;background:#28c840;"></div>
+      <span style="font-size:11px; color:#858585; margin-left:8px; font-family:'Fira Code',monospace;">skills.tsx — terminal</span>
     </div>
+
+    <!-- Terminal body -->
+    <div id="skillsTermBody" style="padding:16px 20px; height:420px; overflow-y:auto; font-family:'Fira Code',monospace;">
+    </div>
+
   </div>
 
-  <!-- ── AI / ML ── -->
-  <div class="sk-section">
-    <div class="sk-title">// AI / Machine Learning</div>
-    <div class="tag-grid">
-      <span class="tag tg">Machine Learning</span>
-      <span class="tag tg">Deep Learning</span>
-      <span class="tag tt">OpenCV</span>
-      <span class="tag tp">TensorFlow</span>
-      <span class="tag tp">scikit-learn</span>
-      <span class="tag tb">LangChain</span>
-      <span class="tag ty2">YOLO</span>
-    </div>
-  </div>
-
-  <!-- ── Web Frameworks ── -->
-  <div class="sk-section">
-    <div class="sk-title">// Web Frameworks</div>
-    <div class="tag-grid">
-      <span class="tag tb">React.js</span>
-      <span class="tag tt">Vite</span>
-      <span class="tag tt">Tailwind CSS</span>
-      <span class="tag ty2">Flask</span>
-      <span class="tag ty2">Django</span>
-      <span class="tag to">FastAPI</span>
-      <span class="tag tp">Leaflet</span>
-    </div>
-  </div>
-
-  <!-- ── Data & Cloud ── -->
-  <div class="sk-section">
-    <div class="sk-title">// Data &amp; Cloud</div>
-    <div class="tag-grid">
-      <span class="tag to">Supabase</span>
-      <span class="tag tb">Google Drive API</span>
-      <span class="tag ty2">KNIME</span>
-      <span class="tag tt">Alteryx</span>
-      <span class="tag tg">PhpMyAdmin</span>
-      <span class="tag to">XAMPP</span>
-    </div>
-  </div>
-
-  <!-- ── Tools & DevOps ── -->
-  <div class="sk-section">
-    <div class="sk-title">// Tools &amp; DevOps</div>
-    <div class="tag-grid">
-      <span class="tag tg">Git</span>
-      <span class="tag tb">VS Code</span>
-      <span class="tag to">Postman</span>
-      <span class="tag tp">Figma</span>
-      <span class="tag tb">Adobe XD</span>
-      <span class="tag ty2">Laragon</span>
-      <span class="tag tt">NetBeans</span>
-      <span class="tag tt">PyCharm</span>
-    </div>
-  </div>
-
-  <!-- ── Embedded & Hardware ── -->
-  <div class="sk-section">
-    <div class="sk-title">// Embedded &amp; Hardware</div>
-    <div class="tag-grid">
-      <span class="tag tr">STM32</span>
-      <span class="tag to">Arduino</span>
-      <span class="tag tg">Raspberry Pi</span>
-      <span class="tag tb">ESP32</span>
-      <span class="tag ty2">Sensor Integration</span>
-      <span class="tag tt">IoT</span>
-    </div>
+  <br>
+  <div class="cb" style="margin-top:8px;">
+    <span class="punc">}</span>
   </div>
 
 </section>
+
+<style>
+.sk-term-line {
+  font-size: 12.5px;
+  line-height: 1.9;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sk-prompt { color: #4ec9b0; flex-shrink: 0; }
+.sk-cmd    { color: #569cd6; }
+.sk-label  { color: #6a9955; font-size: 11px; padding-left: 20px; }
+.sk-tags   { display: flex; flex-wrap: wrap; gap: 6px; padding-left: 20px; margin-bottom: 4px; }
+.sk-cursor {
+  display: inline-block; width: 8px; height: 14px;
+  background: #569cd6; animation: skBlink 1s step-end infinite;
+  vertical-align: middle; margin-left: 2px;
+}
+@keyframes skBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+</style>
+
+<script>
+(function(){
+  const sections = [
+    { cmd: 'cat languages.sh', label: '// Languages', tags: [
+      {t:'Python',c:'tg'},{t:'JavaScript',c:'tb'},{t:'Java',c:'tb'},
+      {t:'PHP',c:'ty2'},{t:'C / C++',c:'to'},{t:'SQL',c:'ty2'},{t:'HTML / CSS',c:'tt'}
+    ]},
+    { cmd: 'cat ai_ml.sh', label: '// AI / Machine Learning', tags: [
+      {t:'Machine Learning',c:'tg'},{t:'Deep Learning',c:'tg'},{t:'OpenCV',c:'tt'},
+      {t:'TensorFlow',c:'tp'},{t:'scikit-learn',c:'tp'},{t:'LangChain',c:'tb'},
+      {t:'YOLO',c:'ty2'},{t:'RAG',c:'tt'},{t:'OpenAI API',c:'tg'}
+    ]},
+    { cmd: 'cat web_frameworks.sh', label: '// Web Frameworks', tags: [
+      {t:'React.js',c:'tb'},{t:'FastAPI',c:'to'},{t:'Flask',c:'ty2'},
+      {t:'Django',c:'ty2'},{t:'Vite',c:'tt'},{t:'Tailwind CSS',c:'tt'},{t:'Leaflet',c:'tp'}
+    ]},
+    { cmd: 'cat cloud_devops.sh', label: '// Cloud & DevOps', tags: [
+      {t:'AWS',c:'tt'},{t:'Railway',c:'tp'},{t:'Vercel',c:'tb'},
+      {t:'Git',c:'tg'},{t:'Supabase',c:'to'},{t:'Postman',c:'to'},{t:'GitHub',c:'tb'}
+    ]},
+    { cmd: 'cat tools.sh', label: '// Tools', tags: [
+      {t:'VS Code',c:'tb'},{t:'Figma',c:'tp'},{t:'Adobe XD',c:'tb'},
+      {t:'PyCharm',c:'tt'},{t:'KNIME',c:'ty2'},{t:'Alteryx',c:'tt'},{t:'Laragon',c:'ty2'}
+    ]},
+    { cmd: 'cat embedded.sh', label: '// Embedded & Hardware', tags: [
+      {t:'Arduino',c:'to'},{t:'ESP32',c:'tr'},{t:'Raspberry Pi',c:'tg'},
+      {t:'STM32',c:'tr'},{t:'Nvidia Nano',c:'tg'},{t:'IoT',c:'tt'},{t:'Linux',c:'tp'}
+    ]}
+  ];
+
+  const body = document.getElementById('skillsTermBody');
+  let started = false;
+
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  function addLine(html, extraClass=''){
+    const d = document.createElement('div');
+    d.className = 'sk-term-line ' + extraClass;
+    d.innerHTML = html;
+    body.appendChild(d);
+    body.scrollTop = body.scrollHeight;
+    return d;
+  }
+
+  async function typeLine(el, text, speed=36){
+    for(const ch of text){
+      el.textContent += ch;
+      await sleep(speed);
+    }
+  }
+
+  async function runSection(sec){
+    // command line
+    const cmdDiv = document.createElement('div');
+    cmdDiv.className = 'sk-term-line';
+    const prompt = document.createElement('span');
+    prompt.className = 'sk-prompt';
+    prompt.textContent = 'precious@dev:~$ ';
+    const cmdSpan = document.createElement('span');
+    cmdSpan.className = 'sk-cmd';
+    const cursor = document.createElement('span');
+    cursor.className = 'sk-cursor';
+    cmdDiv.appendChild(prompt);
+    cmdDiv.appendChild(cmdSpan);
+    cmdDiv.appendChild(cursor);
+    body.appendChild(cmdDiv);
+    body.scrollTop = body.scrollHeight;
+
+    await typeLine(cmdSpan, sec.cmd, 36);
+    cursor.remove();
+    await sleep(150);
+
+    // label
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'sk-label';
+    labelDiv.textContent = sec.label;
+    body.appendChild(labelDiv);
+    await sleep(80);
+
+    // tags
+    const tagsDiv = document.createElement('div');
+    tagsDiv.className = 'sk-tags';
+    body.appendChild(tagsDiv);
+
+    for(const tag of sec.tags){
+      const span = document.createElement('span');
+      span.className = 'tag ' + tag.c;
+      span.textContent = tag.t;
+      span.style.opacity = '0';
+      span.style.transition = 'opacity 0.15s';
+      tagsDiv.appendChild(span);
+      await sleep(80);
+      span.style.opacity = '1';
+      body.scrollTop = body.scrollHeight;
+    }
+
+    await sleep(250);
+  }
+
+  async function runTerminal(){
+    // greeting
+    const greet = document.createElement('div');
+    greet.className = 'sk-term-line';
+    greet.innerHTML = '<span style="color:#6a9955;">// loading skill modules...</span>';
+    body.appendChild(greet);
+    await sleep(400);
+
+    for(const sec of sections){
+      await runSection(sec);
+      await sleep(150);
+    }
+
+    // done line with blinking cursor
+    const done = document.createElement('div');
+    done.className = 'sk-term-line';
+    done.innerHTML = '<span class="sk-prompt">precious@dev:~$</span> <span style="color:#4ec9b0;">// all modules loaded ✓</span><span class="sk-cursor"></span>';
+    body.appendChild(done);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  async function loopTerminal(){
+    while(true){
+      body.innerHTML = '';
+      await runTerminal();
+      await sleep(5000);
+    }
+  }
+
+  // Only start when skills section scrolls into view
+  const target = document.getElementById('skillsTerminal');
+  if('IntersectionObserver' in window){
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting && !started){
+          started = true;
+          loopTerminal();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.2 });
+    observer.observe(target);
+  } else {
+    loopTerminal();
+  }
+})();
+</script>
 <!-- ============================================================
      sections/certifications.html
      Each .cert-item is one certificate card.
@@ -1247,141 +1837,448 @@ textarea.form-input { resize: vertical; min-height: 90px; }
   </div>
 
   <div class="s-cm cb">// src/components/Certifications.tsx</div><br>
-  <div class="cb" style="margin-bottom:16px">
+  <div class="cb" style="margin-bottom:20px">
     <span class="kw">export default function</span> <span class="fn">Certifications</span><span class="punc">() {</span>
   </div>
 
+  <style>
+  .cert-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  @media (max-width: 700px) {
+    .cert-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 420px) {
+    .cert-grid { grid-template-columns: 1fr; }
+  }
+
+  .cert-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .cert-group-title {
+    color: var(--comment);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cert-group-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    min-width: 4px;
+  }
+
+  .cert-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px;
+    transition: border-color .2s, background .2s;
+  }
+  .cert-card:hover { border-color: #555; background: #2a2a2b; }
+
+  .cert-card-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cert-logo {
+    width: 36px; height: 36px;
+    border-radius: 5px;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .cert-logo img {
+    width: 100%; height: 100%;
+    object-fit: contain; padding: 3px;
+  }
+
+  .cert-info { flex: 1; min-width: 0; }
+  .cert-name {
+    color: #d4d4d4;
+    font-size: 11.5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .cert-issuer { color: #858585; font-size: 10.5px; margin-top: 2px; }
+  .cert-date {
+    color: var(--text-dim);
+    font-size: 10px;
+    font-family: 'Fira Code', monospace;
+    margin-top: 2px;
+  }
+
+  .cert-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .cert-badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-family: 'Fira Code', monospace;
+  }
+  .badge-ai    { background:#0d2035; color:#4fc1ff; border:1px solid #2a4a6b; }
+  .badge-data  { background:#0a1f1a; color:#4ec9b0; border:1px solid #1e4a3d; }
+  .badge-net   { background:#081820; color:#4fc1ff; border:1px solid #1a4550; }
+  .badge-tools { background:#1e1c07; color:#dcdcaa; border:1px solid #4a4510; }
+  .badge-award { background:#160a1e; color:#c586c0; border:1px solid #3d2050; }
+
+  .cert-verify {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px;
+    border: 1px solid #2a4a6b;
+    background: #0d2035;
+    border-radius: 3px;
+    color: #4fc1ff;
+    font-size: 10px;
+    font-family: 'Fira Code', monospace;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: border-color .15s, background .15s;
+  }
+  .cert-verify:hover { border-color: #4fc1ff; background: #0a1a2e; }
+  .cert-verify.disabled {
+    border-color: #3c3c3c;
+    background: transparent;
+    color: #5a5a5a;
+    cursor: default;
+    pointer-events: none;
+  }
+  </style>
+
   <div class="cert-grid">
 
-    <div class="cert-item">
-      <img src="/imagescerts/aideploy.jpg" alt="GenAI" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🏅</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>DXC Techno-thon'26: Gen AI Innovation Challenge</h3>
-        <h4>CodeSpotlight · Candidate, 2026</h4>
-        <p>AI system scanning GitHub repos and generating summaries.</p>
+    <!-- ══ COL 1: AI & CLOUD ══ -->
+    <div class="cert-col">
+      <div class="cert-group-title">// AI &amp; Cloud</div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/aideploy.jpg" alt="AI" onerror="this.parentElement.textContent='🤖'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">AI Engineer Production Track: Deploy LLMs & Agents</div>
+            <div class="cert-issuer">UDEMY</div>
+            <div class="cert-date">📅 03/10/2026</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-ai">AI</span>
+          <a href="https://www.udemy.com/certificate/UC-6304510b-0bcf-49c2-bb92-209fa1dd13be/" target="_blank" class="cert-verify">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            verify
+          </a>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/aiagentic.jpg" alt="AI Builder" onerror="this.parentElement.textContent='🏗️'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">AI Engineer Agentic Track: The Complete Agent & MCP Course</div>
+            <div class="cert-issuer">UDEMY</div>
+            <div class="cert-date">📅 03/02/2026</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-ai">AI</span>
+          <a href="https://www.udemy.com/certificate/UC-17f1e9a1-5ff2-43c2-b7cd-ff7c8d8b0f06/" target="_blank" class="cert-verify">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            verify
+          </a>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/aibuilder.jpg" alt="Agentic AI" onerror="this.parentElement.textContent='🧠'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">AI Builder: Create Agents, Voice Agents & Automations</div>
+            <div class="cert-issuer">UDEMY</div>
+            <div class="cert-date">📅 02/27/2026</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-ai">AI</span>
+          <a href="https://www.udemy.com/certificate/UC-7b120568-df4e-4f7e-92a1-a140623a8890/" target="_blank" class="cert-verify">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            verify
+          </a>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/aillm.jpg" alt="LLM" onerror="this.parentElement.textContent='💬'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">AI Engineer Core Track: LLM Engineering, RAG, QLoRA, Agents</div>
+            <div class="cert-issuer">UDEMY</div>
+            <div class="cert-date">📅 02/20/2026</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-ai">AI</span>
+          <a href="https://www.udemy.com/certificate/UC-88071a4f-9fe8-4b05-8189-d8e5331ca6c9/" target="_blank" class="cert-verify">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            verify
+          </a>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/aiengr.jpg" alt="AI Engineer" onerror="this.parentElement.textContent='⚙️'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">AI Engineer for Developers Associate</div>
+            <div class="cert-issuer">DATACAMP</div>
+            <div class="cert-date">📅 01/16/2026</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-ai">AI</span>
+          <a href="https://www.datacamp.com/certificate/AIEDA0017722292548" target="_blank" class="cert-verify">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            verify
+          </a>
+        </div>
       </div>
     </div>
 
-    <div class="cert-item">
-      <img src="/imagescerts/aibuilder.jpg" alt="STM32" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%231a0a1e%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🏅</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>STMicroelectronics: STM32 Innovation Hackathon</h3>
-        <h4>Semifinalist, 2025</h4>
-        <p>Embedded systems programming under time pressure.</p>
+    <!-- ══ COL 2: DATA & ANALYTICS ══ -->
+    <div class="cert-col">
+      <div class="cert-group-title">// Data &amp; Analytics</div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/alteryx.jpg" alt="PyData" onerror="this.parentElement.textContent='🐍'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">Alteryx Designer Core Certification</div>
+            <div class="cert-issuer">ALTERYX</div>
+            <div class="cert-date">📅 01/28/2026</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-data">Data</span>
+          <a href="https://www.credly.com/badges/eba02147-588b-4cd8-b9da-ac81175ce8da/linked_in_profile" target="_blank" class="cert-verify">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            verify
+          </a>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/knime.png" alt="Alteryx" onerror="this.parentElement.textContent='📊'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">Basic Proficiency in KNIME Analytics Platform</div>
+            <div class="cert-issuer">KNIME</div>
+            <div class="cert-date">📅 01/12/2026</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-data">Data</span>
+          <a href="https://www.credly.com/badges/5fe88469-2a26-4369-a147-209df4032524/linked_in_profile" target="_blank" class="cert-verify">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            verify
+          </a>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/pydata.jpg" alt="KNIME" onerror="this.parentElement.textContent='🔬'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">Python Data Associate</div>
+            <div class="cert-issuer">DATACAMP</div>
+            <div class="cert-date">📅 11/25/2025</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-data">Data</span>
+          <a href="#" target="_blank" class="cert-verify">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            verify
+          </a>
+        </div>
       </div>
     </div>
 
-    <div class="cert-item">
-      <img src="/imagescerts/aiagentic.jpg" alt="Techtopia" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230a1f1a%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🏅</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>Techtopia: An Exhibition of Innovation</h3>
-        <h4>City-wide Aqua Network · Finalist, 2024</h4>
-        <p>Smart city water management prototype.</p>
+    <!-- ══ COL 3: NETWORKING ══ -->
+    <div class="cert-col">
+      <div class="cert-group-title">// Networking</div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/cisco1.jpg" alt="Cisco" onerror="this.parentElement.innerHTML='<img src=&quot;https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Cisco_logo.svg/1200px-Cisco_logo.svg.png&quot; style=&quot;width:100%;padding:6px;object-fit:contain;&quot;/>'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">CCNA: Enterprise Networking, Security, and Automation</div>
+            <div class="cert-issuer">CISCO</div>
+            <div class="cert-date">📅 07/29/2024</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-net">Network</span>
+          <a href="https://www.credly.com/badges/f6f6da82-7675-4417-8696-d0afe5b83ac8/linked_in_profile" target="_blank" class="cert-verify">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            verify
+          </a>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/cisco2.jpg" alt="Cisco" onerror="this.parentElement.innerHTML='<img src=&quot;https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Cisco_logo.svg/1200px-Cisco_logo.svg.png&quot; style=&quot;width:100%;padding:6px;object-fit:contain;&quot;/>'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">CCNA: Switching, Routing, and Wireless Essentials</div>
+            <div class="cert-issuer">CISCO</div>
+            <div class="cert-date">📅 08/16/2024</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-net">Network</span>
+          <a href="https://www.credly.com/badges/035c2dc2-3211-43bf-85b3-94626c501c81/linked_in_profile" target="_blank" class="cert-verify">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            verify
+          </a>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/cisco3.jpg" alt="Cisco" onerror="this.parentElement.innerHTML='<img src=&quot;https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Cisco_logo.svg/1200px-Cisco_logo.svg.png&quot; style=&quot;width:100%;padding:6px;object-fit:contain;&quot;/>'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">Network Support and Security</div>
+            <div class="cert-issuer">CISCO</div>
+            <div class="cert-date">📅 12/09/2024</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-net">Network</span>
+          <a href="https://www.credly.com/badges/77dba282-6cf0-4f94-adbc-6fedf1d53212/linked_in_profile" target="_blank" class="cert-verify">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            verify
+          </a>
+        </div>
       </div>
     </div>
 
-    <div class="cert-item">
-      <img src="/imagescerts/aillm.jpg" alt="Nuzlocke" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%231e1c07%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🏆</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>Nuzlocke: 3D Collage</h3>
-        <h4>Champion 🥇, 2024</h4>
-        <p>Technically symbolic 3D collage blending creativity and engineering.</p>
+    <!-- ══ COL 4: PROCESS & TOOLS ══ -->
+    <div class="cert-col">
+      <div class="cert-group-title">// Process, Tools &amp; Web Development</div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/webdev.jpg" alt="Yellow Belt" onerror="this.parentElement.textContent='🥋'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">The Complete Full-Stack Web Development Bootcamp</div>
+            <div class="cert-issuer">UDEMY</div>
+            <div class="cert-date">📅 02/21/2026</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-tools">Web Dev</span>
+          <a href="https://www.udemy.com/certificate/UC-790c25af-d67b-4c8c-ad08-9e8bad784a52/" target="_blank" class="cert-verify">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            verify
+          </a>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/yellowbelt.jpg" alt="Yellow Belt" onerror="this.parentElement.textContent='🥋'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">Six Sigma Yellow Belt Certification</div>
+            <div class="cert-issuer">6SIGMASTUDY</div>
+            <div class="cert-date">📅 02/20/2026</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-tools">Process</span>
+        </div>
+      </div>
+
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-logo">
+            <img src="/imagescerts/whitebelt.jpg" alt="White Belt" onerror="this.parentElement.textContent='🥋'"/>
+          </div>
+          <div class="cert-info">
+            <div class="cert-name">Lean Six Sigma White Belt Certification</div>
+            <div class="cert-issuer">THE COUNCIL FOR SIX SIGMA CERTIFICATION</div>
+            <div class="cert-date">📅 02/18/2026</div>
+          </div>
+        </div>
+        <div class="cert-footer">
+          <span class="cert-badge badge-tools">Process</span>
+        </div>
       </div>
     </div>
 
-    <div class="cert-item">
-      <img src="/imagescerts/webdev.jpg" alt="CpElympics" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%23211007%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23ce9178%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🥈</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>CpElympics: Design Sprint</h3>
-        <h4>OIL AWAY! · 2nd Place, 2023</h4>
-        <p>Oil spill cleaning and containment system prototype.</p>
-      </div>
-    </div>
+  </div><!-- /.cert-grid -->
 
-    <div class="cert-item">
-      <img src="/imagescerts/aiengr.jpg" alt="Robothon" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230a1f1a%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234ec9b0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🤖</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>ICpEP.se CpE Challenge: Robothon</h3>
-        <h4>Sustainable AgroBot · Candidate, 2023</h4>
-        <p>Dual-powered autonomous robot for soil arability.</p>
-      </div>
-    </div>
-
-    <!-- ── Fill in titles/descriptions for remaining certs below ── -->
-
-    <div class="cert-item">
-      <img src="/imagescerts/pydata.jpg" alt="PyData" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23569cd6%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🎓</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>PyData Certificate</h3>
-        <h4>Update with your details</h4>
-        <p>Replace with your certificate info.</p>
-      </div>
-    </div>
-
-    <div class="cert-item">
-      <img src="/imagescerts/alteryx.jpg" alt="Alteryx" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%231a0a1e%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23c586c0%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🎓</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>Alteryx Certification</h3>
-        <h4>Update with your details</h4>
-        <p>Replace with your certificate info.</p>
-      </div>
-    </div>
-
-    <div class="cert-item">
-      <img src="/imagescerts/yellowbelt.jpg" alt="Yellow Belt" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%231e1c07%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🥋</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>Yellow Belt Certification</h3>
-        <h4>Update with your details</h4>
-        <p>Replace with your certificate info.</p>
-      </div>
-    </div>
-
-    <div class="cert-item">
-      <img src="/imagescerts/whitebelt.jpg" alt="White Belt" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%23181818%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23d4d4d4%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🥋</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>White Belt Certification</h3>
-        <h4>Update with your details</h4>
-        <p>Replace with your certificate info.</p>
-      </div>
-    </div>
-
-    <div class="cert-item">
-      <img src="/imagescerts/cisco1.jpg" alt="Cisco 1" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🌐</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>Cisco Certification 1</h3>
-        <h4>Update with your details</h4>
-        <p>Replace with your certificate info.</p>
-      </div>
-    </div>
-
-    <div class="cert-item">
-      <img src="/imagescerts/cisco2.jpg" alt="Cisco 2" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🌐</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>Cisco Certification 2</h3>
-        <h4>Update with your details</h4>
-        <p>Replace with your certificate info.</p>
-      </div>
-    </div>
-
-    <div class="cert-item">
-      <img src="/imagescerts/cisco3.jpg" alt="Cisco 3" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%230d2035%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%234fc1ff%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>🌐</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>Cisco Certification 3</h3>
-        <h4>Update with your details</h4>
-        <p>Replace with your certificate info.</p>
-      </div>
-    </div>
-
-    <div class="cert-item">
-      <img src="/imagescerts/knime.png" alt="KNIME" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22130%22><rect fill=%22%231e1c07%22 width=%22300%22 height=%22130%22/><text x=%2250%%22 y=%2250%%22 fill=%22%23dcdcaa%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2248%22>📊</text></svg>'"/>
-      <div class="cert-item-body">
-        <h3>KNIME Analytics Platform</h3>
-        <h4>Update with your details</h4>
-        <p>Replace with your certificate info.</p>
-      </div>
-    </div>
-
-  </div><!-- /cert-grid -->
+  <br>
+  <div class="cb" style="margin-top:8px;">
+    <span class="punc">}</span>
+  </div>
 
 </section>
 <!-- ============================================================
@@ -1403,31 +2300,41 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 
     <div class="form-group">
       <label class="form-label"><span class="kw">const</span> name <span class="op">=</span></label>
-      <input class="form-input" type="text" placeholder='"Your Name"'/>
+      <input class="form-input" type="text" id="contactName" placeholder='"Your Name"'/>
     </div>
     <div class="form-group">
       <label class="form-label"><span class="kw">const</span> email <span class="op">=</span></label>
-      <input class="form-input" type="email" placeholder='"your@email.com"'/>
+      <input class="form-input" type="email" id="contactEmail" placeholder='"your@email.com"'/>
+    </div>
+    <div class="form-group">
+      <label class="form-label"><span class="kw">const</span> subject <span class="op">=</span></label>
+      <input class="form-input" type="text" id="contactSubject" placeholder='"Job Opportunity / Collaboration / Project"'/>
     </div>
     <div class="form-group">
       <label class="form-label"><span class="kw">const</span> message <span class="op">=</span></label>
-      <textarea class="form-input" placeholder='"Hello! I would like to..."'></textarea>
+      <textarea class="form-input" id="contactMessage" placeholder='"Hello! I would like to..."'></textarea>
     </div>
-    <button class="btn">send<span class="punc">(</span>message<span class="punc">)</span></button>
+
+    <!-- Status message -->
+    <div id="contactStatus" style="display:none; margin-bottom:12px; padding:8px 12px; border-radius:3px; font-size:12px; font-family:'Fira Code',monospace;"></div>
+
+    <button class="btn" id="contactBtn" onclick="sendContactForm()">
+      send<span class="punc">(</span>message<span class="punc">)</span>
+    </button>
   </div>
 
   <br><br>
 
-  <!-- ── Social links — update href values ── -->
+  <!-- Social links -->
   <div style="padding-left:24px">
     <div class="s-cm" style="margin-bottom:12px">// Or find me at</div>
     <span class="kw">const</span> <span class="var">socials</span> <span class="op">=</span> <span class="punc">{</span><br>
     <span class="i1"></span><span class="prop">email</span><span class="op">:</span>
-      <a class="str inline-link" href="/cdn-cgi/l/email-protection#3c4c4e595f5553494f7c59515d5550125f5351" style="color:var(--orange)">"<span class="__cf_email__" data-cfemail="a1d1d3c4c2c8ced4d2e1c4ccc0c8cd8fc2cecc">[email&#160;protected]</span>"</a><span class="punc">,</span><br>
+      <a class="str inline-link" href="mailto:rp.dejoyawork@gmail.com" style="color:var(--orange)">"rp.dejoyawork@gmail.com"</a><span class="punc">,</span><br>
     <span class="i1"></span><span class="prop">linkedin</span><span class="op">:</span>
-      <a class="str inline-link" href="https://linkedin.com/in/precious" target="_blank" style="color:var(--orange)">"linkedin.com/in/precious"</a><span class="punc">,</span><br>
+      <a class="str inline-link" href="https://www.linkedin.com/in/reginepreciousdejoya/" target="_blank" style="color:var(--orange)">"https://www.linkedin.com/in/reginepreciousdejoya/"</a><span class="punc">,</span><br>
     <span class="i1"></span><span class="prop">github</span><span class="op">:</span>
-      <a class="str inline-link" href="https://github.com/precious" target="_blank" style="color:var(--orange)">"github.com/precious"</a><span class="punc">,</span><br>
+      <a class="str inline-link" href="https://github.com/engr-rpdj" target="_blank" style="color:var(--orange)">"https://github.com/engr-rpdj"</a><span class="punc">,</span><br>
     <span class="punc">};</span>
   </div>
 
@@ -1435,6 +2342,91 @@ textarea.form-input { resize: vertical; min-height: 90px; }
   <span class="punc">}</span>
 
 </section>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+(function(){
+  // ── REPLACE THESE THREE VALUES ──
+  const EMAILJS_PUBLIC_KEY  = 'zYQeXzTyXpAyZK-5D';
+  const EMAILJS_SERVICE_ID  = 'service_ane4lia';
+  const EMAILJS_TEMPLATE_ID = 'template_k9chi7q';
+  // ────────────────────────────────
+
+  emailjs.init(EMAILJS_PUBLIC_KEY);
+
+  window.sendContactForm = async function() {
+    const name    = document.getElementById('contactName').value.trim();
+    const email   = document.getElementById('contactEmail').value.trim();
+    const message = document.getElementById('contactMessage').value.trim();
+    const status  = document.getElementById('contactStatus');
+    const btn     = document.getElementById('contactBtn');
+
+    // Basic validation
+    const subject = document.getElementById('contactSubject').value.trim();
+    if(!name || !email || !subject || !message){
+      status.style.display = 'block';
+      status.style.background = '#1e0707';
+      status.style.border = '1px solid #5a1515';
+      status.style.color = '#f44747';
+      status.textContent = '// error: all fields are required';
+      return;
+    }
+
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      status.style.display = 'block';
+      status.style.background = '#1e0707';
+      status.style.border = '1px solid #5a1515';
+      status.style.color = '#f44747';
+      status.textContent = '// error: invalid email address';
+      return;
+    }
+
+    // Sending state
+    btn.disabled = true;
+    btn.innerHTML = 'sending<span class="punc">...</span>';
+    status.style.display = 'none';
+
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        from_name:  name,
+        from_email: email,
+        subject:    subject,
+        message:    message,
+        reply_to:   email,
+      });
+
+      // Success
+      status.style.display = 'block';
+      status.style.background = '#0a1f1a';
+      status.style.border = '1px solid #1e4a3d';
+      status.style.color = '#4ec9b0';
+      status.textContent = '// message sent successfully ✓';
+      btn.innerHTML = 'sent<span class="punc">✓</span>';
+
+      // Clear form
+      document.getElementById('contactName').value = '';
+      document.getElementById('contactEmail').value = '';
+      document.getElementById('contactMessage').value = '';
+
+      // Reset button after 3s
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = 'send<span class="punc">(</span>message<span class="punc">)</span>';
+      }, 3000);
+
+    } catch(err) {
+      status.style.display = 'block';
+      status.style.background = '#1e0707';
+      status.style.border = '1px solid #5a1515';
+      status.style.color = '#f44747';
+      status.textContent = '// error: failed to send. try again later';
+      btn.disabled = false;
+      btn.innerHTML = 'send<span class="punc">(</span>message<span class="punc">)</span>';
+      console.error('EmailJS error:', err);
+    }
+  };
+})();
+</script>
       </div><!-- /editor-scroll -->
 
       <!-- MINIMAP -->
@@ -1466,9 +2458,9 @@ textarea.form-input { resize: vertical; min-height: 90px; }
    js/app.js — Navigation, scroll spy, tabs, minimap
    ============================================================ */
 
-const SECTIONS = ['home','about','experience','projects','competitions','skills','certifications','contact'];
+const SECTIONS = ['home','about','experience','projects','hackathons','skills','certifications','contact'];
 const ICONS    = { home:'🏠', about:'👤', experience:'💼', projects:'🚀',
-                   competitions:'🏆', skills:'⚡', certifications:'🎓', contact:'📬' };
+                   hackathons:'🏆', skills:'⚡', certifications:'🎓', contact:'📬' };
 
 let openTabs   = ['home'];
 let activeSection = 'home';
@@ -1659,7 +2651,7 @@ function toggleChat() {
   if (chatOpen) {
     document.getElementById('chatInput').focus();
     if (document.getElementById('chatMessages').children.length === 0) {
-      addBotMessage("Hi! I'm Precious's AI twin 👋 Ask me anything about her background, skills, or projects.");
+      addBotMessage("Hi! I'm Precious. Ask me anything!");
     }
   }
 }
@@ -1668,7 +2660,7 @@ function addBotMessage(text, streaming = false) {
   const msgs = document.getElementById('chatMessages');
   const div  = document.createElement('div');
   div.className = 'chat-msg bot';
-  div.innerHTML = `<span class="chat-avatar">P</span><div class="chat-bubble">${escapeHtml(text)}</div>`;
+  div.innerHTML = `<img src="/images/profile.jpg" class="chat-avatar-img" onerror="this.outerHTML='<span class=\\'chat-avatar\\'>P</span>'" /><div class="chat-bubble">${escapeHtml(text)}</div>`;
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
   return div.querySelector('.chat-bubble');
@@ -1782,7 +2774,7 @@ function askSuggestion(text) {
   <div id="chatHeader">
     <div class="chat-header-left">
       <span class="chat-header-dot"></span>
-      <span class="chat-header-title">twin.ai — precious.dev</span>
+      <span class="chat-header-title">twin.ai — engr-rpdj.dev</span>
     </div>
     <div class="chat-header-actions">
       <button class="chat-header-btn" onclick="chatSessionId=null;document.getElementById('chatMessages').innerHTML='';addBotMessage('Session cleared. Ask me anything!')" title="Clear chat">
@@ -1814,7 +2806,7 @@ function askSuggestion(text) {
     <input
       id="chatInput"
       type="text"
-      placeholder="ask me anything..."
+      placeholder="place your questions here..."
       onkeydown="chatKeydown(event)"
       autocomplete="off"
     />
@@ -1830,23 +2822,21 @@ function askSuggestion(text) {
 ══════════════════════════════════════ */
 
 #chatPanel {
+  display: none;
   position: fixed;
-  bottom: var(--statusbar-h);
+  bottom: 0;
   left: var(--activity-w);
   right: 0;
   height: 340px;
   background: #1e1e1e;
   border-top: 2px solid var(--blue);
-  display: flex;
   flex-direction: column;
-  z-index: 100;
-  transform: translateY(100%);
-  transition: transform 0.25s ease;
   font-family: 'Fira Code', monospace;
+  z-index: 100;
 }
 
 #chatPanel.open {
-  transform: translateY(0);
+  display: flex;
 }
 
 /* ── Header (terminal tab bar style) ── */
@@ -1893,6 +2883,16 @@ function askSuggestion(text) {
   transition: background .15s, color .15s;
 }
 .chat-header-btn:hover { background: var(--bg-hover); color: var(--text); }
+
+.chat-avatar-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  object-fit: cover;
+  object-position: top;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
 
 /* ── Suggestions ── */
 #chatSuggestions {
@@ -2050,5 +3050,222 @@ function askSuggestion(text) {
   }
 }
 </style>
+<canvas id="bgCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+
+<script>
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();
+window.addEventListener('resize',()=>{resize();buildGrid();});
+const GRID=40,NODE_COLOR='#569cd6',LINE_COLOR='#2a4a6b',PULSE_COLOR='#4fc1ff';
+let nodes=[],pulses=[];
+function buildGrid(){nodes=[];const cols=Math.ceil(canvas.width/GRID)+1,rows=Math.ceil(canvas.height/GRID)+1;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(Math.random()<0.25)nodes.push({x:c*GRID,y:r*GRID,r:Math.random()<0.3?2.5:1.5});}
+function buildPulse(){if(nodes.length<2)return;const start=nodes[Math.floor(Math.random()*nodes.length)];const steps=3+Math.floor(Math.random()*4);const path=[{x:start.x,y:start.y}];for(let i=0;i<steps;i++){const last=path[path.length-1];const dirs=[{x:last.x+GRID,y:last.y},{x:last.x-GRID,y:last.y},{x:last.x,y:last.y+GRID},{x:last.x,y:last.y-GRID}].filter(d=>d.x>=0&&d.y>=0&&d.x<=canvas.width&&d.y<=canvas.height);if(!dirs.length)break;path.push(dirs[Math.floor(Math.random()*dirs.length)]);}pulses.push({path,t:0,speed:0.008+Math.random()*0.012,alpha:1});}
+buildGrid();for(let i=0;i<4;i++)buildPulse();
+let lastPulse=0;
+function draw(ts){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.strokeStyle=LINE_COLOR;ctx.lineWidth=0.8;nodes.forEach(n=>{[{x:n.x+GRID,y:n.y},{x:n.x,y:n.y+GRID}].forEach(t=>{if(nodes.find(m=>m.x===t.x&&m.y===t.y)){ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.lineTo(t.x,t.y);ctx.stroke();}});});nodes.forEach(n=>{ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle=NODE_COLOR;ctx.globalAlpha=0.5;ctx.fill();ctx.globalAlpha=1;});pulses=pulses.filter(p=>p.alpha>0);pulses.forEach(p=>{p.t+=p.speed;const idx=Math.floor(p.t*(p.path.length-1));const frac=(p.t*(p.path.length-1))-idx;if(idx>=p.path.length-1){p.alpha-=0.02;return;}const a=p.path[idx],b=p.path[idx+1];const cx=a.x+(b.x-a.x)*frac,cy=a.y+(b.y-a.y)*frac;ctx.strokeStyle=PULSE_COLOR;ctx.lineWidth=1.5;ctx.globalAlpha=p.alpha*0.8;ctx.beginPath();for(let i=0;i<idx;i++)i===0?ctx.moveTo(p.path[i].x,p.path[i].y):ctx.lineTo(p.path[i].x,p.path[i].y);ctx.lineTo(cx,cy);ctx.stroke();ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);ctx.fillStyle=PULSE_COLOR;ctx.globalAlpha=p.alpha;ctx.fill();ctx.globalAlpha=1;});if(ts-lastPulse>800&&pulses.length<8){buildPulse();lastPulse=ts;}requestAnimationFrame(draw);}
+requestAnimationFrame(draw);
+
+// ══ SEARCH FEATURE ══
+let searchMatches = [];
+let searchIndex = -1;
+let highlights = [];
+
+function toggleSearch() {
+  const panel = document.getElementById('searchPanel');
+  const sidebar = document.getElementById('sidebar');
+  const searchIcon = document.getElementById('searchActivityIcon');
+  const isOpen = panel.style.display === 'flex';
+  if (isOpen) {
+    panel.style.display = 'none';
+    searchIcon.classList.remove('active');
+    clearSearch();
+  } else {
+    sidebar.classList.add('collapsed');
+    panel.style.display = 'flex';
+    panel.style.flexDirection = 'column';
+    searchIcon.classList.add('active');
+    setTimeout(() => document.getElementById('searchInput').focus(), 50);
+  }
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
+  document.getElementById('searchCount').style.display = 'none';
+  removeHighlights();
+  searchMatches = [];
+  searchIndex = -1;
+}
+
+function removeHighlights() {
+  document.querySelectorAll('.search-highlight').forEach(el => {
+    const parent = el.parentNode;
+    if (parent) {
+      parent.replaceChild(document.createTextNode(el.textContent), el);
+      parent.normalize();
+    }
+  });
+  highlights = [];
+}
+
+function runSearch(query) {
+  const resultsEl = document.getElementById('searchResults');
+  const countEl = document.getElementById('searchCount');
+  removeHighlights();
+  searchMatches = [];
+  searchIndex = -1;
+  resultsEl.innerHTML = '';
+
+  if (!query || query.trim().length < 2) {
+    countEl.style.display = 'none';
+    return;
+  }
+
+  const q = query.trim().toLowerCase();
+  const editorScroll = document.getElementById('editorScroll');
+  const sections = editorScroll.querySelectorAll('.section-block');
+  const grouped = {};
+
+  sections.forEach(section => {
+    const sectionId = section.id;
+    const walker = document.createTreeWalker(section, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const text = node.textContent.trim();
+        if (!text || text.length < 2) return NodeFilter.FILTER_REJECT;
+        const tag = node.parentElement?.tagName;
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'MARK') return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+
+    let node;
+    while ((node = walker.nextNode())) {
+      const text = node.textContent;
+      if (text.toLowerCase().includes(q)) {
+        if (!grouped[sectionId]) grouped[sectionId] = [];
+        grouped[sectionId].push({ node, text, sectionId });
+        searchMatches.push({ node, text, sectionId });
+      }
+    }
+  });
+
+  // Highlight matches
+  const processed = new Set();
+  searchMatches.forEach(m => {
+    if (processed.has(m.node)) return;
+    processed.add(m.node);
+    highlightNode(m.node, q);
+  });
+
+  if (searchMatches.length === 0) {
+    resultsEl.innerHTML = '<div style="padding:12px;font-size:11px;color:var(--text-dim);font-family:Fira Code,monospace;">// no results found</div>';
+    countEl.style.display = 'none';
+    return;
+  }
+
+  countEl.textContent = searchMatches.length + ' results';
+  countEl.style.display = 'block';
+
+  const icons = { home:'🏠', about:'👤', experience:'💼', projects:'🚀', hackathons:'🏆', skills:'⚡', certifications:'🎓', contact:'📬' };
+
+  Object.keys(grouped).forEach(sectionId => {
+    const group = grouped[sectionId];
+    const groupEl = document.createElement('div');
+    groupEl.style.marginBottom = '4px';
+
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;align-items:center;gap:6px;padding:4px 8px;cursor:pointer;font-size:11px;color:var(--text-muted);font-family:Fira Code,monospace;border-radius:3px;';
+    header.onmouseover = () => header.style.background = 'var(--bg-hover)';
+    header.onmouseout = () => header.style.background = 'transparent';
+    header.innerHTML = `<span>${icons[sectionId]||'📄'}</span><span style="flex:1">${sectionId}.tsx</span><span style="color:var(--text-dim);font-size:10px;">${group.length}</span>`;
+    header.onclick = () => { scrollToSection(sectionId); jumpToFirstHighlightInSection(sectionId); };
+    groupEl.appendChild(header);
+
+    group.slice(0, 3).forEach(match => {
+      const preview = document.createElement('div');
+      preview.style.cssText = 'padding:3px 8px 3px 24px;cursor:pointer;font-size:10.5px;color:var(--text-dim);font-family:Fira Code,monospace;border-radius:3px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+      preview.onmouseover = () => preview.style.background = 'var(--bg-hover)';
+      preview.onmouseout = () => preview.style.background = 'transparent';
+      const raw = match.text;
+      const lower = raw.toLowerCase();
+      const mIdx = lower.indexOf(q);
+      const start = Math.max(0, mIdx - 20);
+      const end = Math.min(raw.length, mIdx + q.length + 20);
+      const before = escHtml(raw.slice(start, mIdx));
+      const matched = escHtml(raw.slice(mIdx, mIdx + q.length));
+      const after = escHtml(raw.slice(mIdx + q.length, end));
+      preview.innerHTML = `${start>0?'...':''}${before}<span style="color:#dcdcaa;background:#3d3800;">${matched}</span>${after}${end<raw.length?'...':''}`;
+      preview.onclick = () => { scrollToSection(sectionId); jumpToFirstHighlightInSection(sectionId); };
+      groupEl.appendChild(preview);
+    });
+
+    if (group.length > 3) {
+      const more = document.createElement('div');
+      more.style.cssText = 'padding:2px 8px 2px 24px;font-size:10px;color:var(--text-dim);font-family:Fira Code,monospace;';
+      more.textContent = `+${group.length - 3} more`;
+      groupEl.appendChild(more);
+    }
+
+    resultsEl.appendChild(groupEl);
+  });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightNode(node, query) {
+  const text = node.textContent;
+  const lower = text.toLowerCase();
+  const q = query.toLowerCase();
+  let idx = lower.indexOf(q);
+  if (idx === -1) return;
+  const frag = document.createDocumentFragment();
+  let last = 0;
+  while (idx !== -1) {
+    frag.appendChild(document.createTextNode(text.slice(last, idx)));
+    const mark = document.createElement('mark');
+    mark.textContent = text.slice(idx, idx + q.length);
+    mark.style.cssText = 'background:#3d3800;color:#dcdcaa;border-radius:2px;padding:0 1px;';
+    mark.className = 'search-highlight';
+    frag.appendChild(mark);
+    last = idx + q.length;
+    idx = lower.indexOf(q, last);
+  }
+  frag.appendChild(document.createTextNode(text.slice(last)));
+  node.parentNode.replaceChild(frag, node);
+}
+
+function jumpToFirstHighlightInSection(sectionId) {
+  const section = document.getElementById(sectionId);
+  if (!section) return;
+  const first = section.querySelector('.search-highlight');
+  if (first) first.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function searchKeydown(e) {
+  if (e.key === 'Escape') toggleSearch();
+  if (e.key === 'Enter') {
+    const all = document.querySelectorAll('.search-highlight');
+    if (!all.length) return;
+    searchIndex = (searchIndex + 1) % all.length;
+    all[searchIndex].scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+}
+
+function toggleSidebarIcon() {
+  toggleSidebar();
+  const icon = document.getElementById('explorerActivityIcon');
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar.classList.contains('collapsed')) {
+    icon.classList.remove('active');
+  } else {
+    icon.classList.add('active');
+  }
+}
+
+</script>
 </body>
 </html>

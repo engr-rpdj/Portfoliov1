@@ -4,6 +4,7 @@ import uuid
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -23,6 +24,13 @@ SUMMARY   = os.path.join(DATA_DIR, "summary.txt")
 
 # ── App ──────────────────────────────────────────────────────
 app = FastAPI(title=f"{TWIN_NAME} — AI Digital Twin")
+
+app.mount("/images", StaticFiles(directory="images"), name="images")
+app.mount("/imagescerts", StaticFiles(directory="imagescerts"), name="imagescerts")
+app.mount("/imagescv", StaticFiles(directory="imagescv"), name="imagescv")
+app.mount("/imagesemb", StaticFiles(directory="imagesemb"), name="imagesemb")
+app.mount("/imageswebapp", StaticFiles(directory="imageswebapp"), name="imageswebapp")
+app.mount("/gifs", StaticFiles(directory="gifs"), name="gifs")
 
 app.add_middleware(
     CORSMiddleware,

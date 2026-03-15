@@ -624,7 +624,14 @@ textarea.form-input { resize: vertical; min-height: 90px; }
 
   /* Titlebar */
   .titlebar { height: 40px; padding: 0 8px; }
-  .titlebar-title { font-size: 11px; }
+  .titlebar-title {
+    font-size: 11px;
+    position: static;
+    transform: none;
+    flex: 1;
+    text-align: center;
+    pointer-events: none;
+  }
 
   /* Status bar — pinned above mobile nav */
   .statusbar {
@@ -669,7 +676,12 @@ textarea.form-input { resize: vertical; min-height: 90px; }
     flex-shrink: unset !important;
   }
   #profilePhotoCard { width: 100% !important; max-width: 340px !important; }
-  #profilePhotoCard img { height: 200px !important; }
+  #profilePhotoCard img {
+    height: auto !important;
+    max-height: 400px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+  }
 
   /* ABOUT stats */
   section#about div[style*="gap:24px"] { gap: 14px !important; flex-wrap: wrap; }
@@ -955,8 +967,23 @@ textarea.form-input { resize: vertical; min-height: 90px; }
       </div>
 
       <!-- Caption -->
+      <!-- <div style="text-align:center;">
+        <div style="font-size:11px; color:#858585; font-family:'JetBrains Mono',monospace;">// click to chat with my AI twin</div>
+      </div> -->
       <div style="text-align:center;">
         <div style="font-size:11px; color:#858585; font-family:'JetBrains Mono',monospace;">// click to chat with my AI twin</div>
+        <a href="https://web-production-6bc16.up.railway.app/app" target="_blank"
+          style="display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:6px 14px;
+                  background:#0a1f1a; border:1px solid #1e4a3d; border-radius:3px;
+                  color:#4ec9b0; text-decoration:none; font-size:11px;
+                  font-family:'JetBrains Mono',monospace; transition:all .15s;"
+          onmouseover="this.style.background='#0d2a20';this.style.borderColor='#4ec9b0';this.style.boxShadow='0 0 8px rgba(78,201,176,0.2)'"
+          onmouseout="this.style.background='#0a1f1a';this.style.borderColor='#1e4a3d';this.style.boxShadow='none'">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          click here to create your own avatar!
+        </a>
       </div>
 
     </div>

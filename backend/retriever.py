@@ -25,7 +25,7 @@ def _cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-10))
 
 
-def chunk_text(text: str, max_words: int = 150) -> list:
+def chunk_text(text: str, max_words: int = 80) -> list:
     sentences = text.replace("\n", " ").split(". ")
     chunks = []
     chunk = ""

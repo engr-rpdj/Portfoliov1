@@ -2930,15 +2930,15 @@ let chatOpen     = false;
 let chatSessionId = null;
 let isStreaming  = false;
 
-const quickAnswers = {
-  "What are your top skills?": "My strongest area is Generative AI — RAG pipelines, LLM-powered APIs, and agentic AI using Python, FastAPI, and OpenAI. On the full-stack side I work with React, Tailwind, and Supabase. I also do embedded systems and IoT — Arduino, ESP32, Raspberry Pi — so I can build across software and hardware in one package.",
-  "Tell me about your work experience": "I've worked at DXC Technology as an Analyst managing SAP accounts, interned at Flyhub Digital building PHP invoice systems and handling AWS deployments, and did an academic internship at BatStateU building a real-time GIS mapping system. Before that I freelanced for 4 years delivering 15+ Python and Java projects and embedded IoT solutions.",
-  "What projects have you built?": "My two main AI projects are CodeSpotlight — an AI that scans GitHub repos and explains the codebase — and CloneX — a platform that turns any documents into a deployable AI agent for customer support or virtual assistants. I've also built computer vision systems including a drowning detection system with 93% accuracy and a fire detection system trained on 30,000 images. On the hardware side I've built IoT systems, an autonomous car from pure logic gates, and smart greenhouse and flood prevention systems.",
-  "What are you currently working on?": "I'm actively building in the AI space and currently available for work! I'm looking for Generative AI Engineer or Full-Stack Developer roles. You can reach me at rp.dejoyawork@gmail.com or on LinkedIn at linkedin.com/in/reginepreciousdejoya.",
-  "What is CodeSpotlight?": "CodeSpotlight is an AI tool I built that scans any GitHub repository and surfaces what matters — architecture, patterns, and risks — so developers can understand unfamiliar code without needing a senior dev to explain it. It uses RAG and OpenAI to ground every response in the actual repo content, and has an interactive chat interface for deep-diving into the codebase. Try it live at codespotlightv1-production.up.railway.app!",
-  "What is CloneX?": "CloneX is a platform I built that lets developers and businesses create their own AI conversational agent just by uploading documents and defining a personality, role, and tone. No need to build a chatbot from scratch — it generates a deployable, document-grounded AI that can serve as customer support, a virtual assistant, or a branded chatbot. This AI twin you're talking to right now is actually powered by CloneX!",
-  "Are you open to work?": "Yes, actively! I'm looking for Generative AI Engineer or Full-Stack Developer roles. Feel free to reach out at rp.dejoyawork@gmail.com or connect on LinkedIn at linkedin.com/in/reginepreciousdejoya."
-};
+// const quickAnswers = {
+//   "What are your top skills?": "My strongest area is Generative AI — RAG pipelines, LLM-powered APIs, and agentic AI using Python, FastAPI, and OpenAI. On the full-stack side I work with React, Tailwind, and Supabase. I also do embedded systems and IoT — Arduino, ESP32, Raspberry Pi — so I can build across software and hardware in one package.",
+//   "Tell me about your work experience": "I've worked at DXC Technology as an Analyst managing SAP accounts, interned at Flyhub Digital building PHP invoice systems and handling AWS deployments, and did an academic internship at BatStateU building a real-time GIS mapping system. Before that I freelanced for 4 years delivering 15+ Python and Java projects and embedded IoT solutions.",
+//   "What projects have you built?": "My two main AI projects are CodeSpotlight — an AI that scans GitHub repos and explains the codebase — and CloneX — a platform that turns any documents into a deployable AI agent for customer support or virtual assistants. I've also built computer vision systems including a drowning detection system with 93% accuracy and a fire detection system trained on 30,000 images. On the hardware side I've built IoT systems, an autonomous car from pure logic gates, and smart greenhouse and flood prevention systems.",
+//   "What are you currently working on?": "I'm actively building in the AI space and currently available for work! I'm looking for Generative AI Engineer or Full-Stack Developer roles. You can reach me at rp.dejoyawork@gmail.com or on LinkedIn at linkedin.com/in/reginepreciousdejoya.",
+//   "What is CodeSpotlight?": "CodeSpotlight is an AI tool I built that scans any GitHub repository and surfaces what matters — architecture, patterns, and risks — so developers can understand unfamiliar code without needing a senior dev to explain it. It uses RAG and OpenAI to ground every response in the actual repo content, and has an interactive chat interface for deep-diving into the codebase. Try it live at codespotlightv1-production.up.railway.app!",
+//   "What is CloneX?": "CloneX is a platform I built that lets developers and businesses create their own AI conversational agent just by uploading documents and defining a personality, role, and tone. No need to build a chatbot from scratch — it generates a deployable, document-grounded AI that can serve as customer support, a virtual assistant, or a branded chatbot. This AI twin you're talking to right now is actually powered by CloneX!",
+//   "Are you open to work?": "Yes, actively! I'm looking for Generative AI Engineer or Full-Stack Developer roles. Feel free to reach out at rp.dejoyawork@gmail.com or connect on LinkedIn at linkedin.com/in/reginepreciousdejoya."
+// };
 
 function toggleChat() {
   chatOpen = !chatOpen;
@@ -2997,13 +2997,13 @@ async function sendChat() {
   const question = input.value.trim();
   if (!question || isStreaming) return;
 
-  // ── Quick answers lookup ──
-  if (quickAnswers[question]) {
-    input.value = '';
-    addUserMessage(question);
-    addBotMessage(quickAnswers[question]);
-    return;
-  }
+  // // ── Quick answers lookup ──
+  // if (quickAnswers[question]) {
+  //   input.value = '';
+  //   addUserMessage(question);
+  //   addBotMessage(quickAnswers[question]);
+  //   return;
+  // }
 
   input.value = '';
   addUserMessage(question);

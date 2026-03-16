@@ -2775,11 +2775,16 @@ function closeTab(e, name) {
    Used by sidebar clicks, tab clicks, quick-links
 ───────────────────────────────────────── */
 //function scrollTo(id) { scrollToSection(id); } // alias for inline onclick
-function goTo(id) { scrollToSection(id); }
-
 function scrollToSection(id) {
   if (!SECTIONS.includes(id)) return;
   scrolling = true;
+
+  // Close mobile search panel if open
+  const panel = document.getElementById('searchPanel');
+  if (panel.style.display === 'flex') {
+    panel.style.cssText = '';
+    document.getElementById('mobileSearchBtn').style.color = 'var(--text-muted)';
+  }
 
   const el = document.getElementById(id);
   const container = document.getElementById('editorScroll');
@@ -2788,8 +2793,6 @@ function scrollToSection(id) {
   }
 
   setActive(id);
-
-  // Re-enable scroll-spy after animation settles
   setTimeout(() => { scrolling = false; }, 800);
 }
 
@@ -3577,18 +3580,25 @@ function toggleMobileSearch() {
   const panel = document.getElementById('searchPanel');
   const isOpen = panel.style.display === 'flex';
   if (isOpen) {
-    panel.style.display = 'none';
+    panel.style.cssText = '';
     document.getElementById('mobileSearchBtn').style.color = 'var(--text-muted)';
+    clearSearch();
   } else {
-    panel.style.display = 'flex';
-    panel.style.flexDirection = 'column';
-    panel.style.position = 'fixed';
-    panel.style.top = '40px';
-    panel.style.left = '0';
-    panel.style.right = '0';
-    panel.style.bottom = '72px';
-    panel.style.width = '100%';
-    panel.style.zIndex = '500';
+    // Use cssText to override the !important rule
+    panel.style.cssText = `
+      display: flex !important;
+      flex-direction: column;
+      position: fixed;
+      top: 40px;
+      left: 0;
+      right: 0;
+      bottom: 72px;
+      width: 100%;
+      z-index: 500;
+      background: var(--bg-sidebar);
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    `;
     document.getElementById('mobileSearchBtn').style.color = '#4ec9b0';
     setTimeout(() => document.getElementById('searchInput').focus(), 50);
   }

@@ -19,6 +19,7 @@ CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR  = os.path.join(BASE_DIR, "..", "data")
 HTML_FILE = os.path.join(BASE_DIR, "..", "portfolio.html")
+LINKEDIN  = os.path.join(DATA_DIR, "linkedin.pdf")
 SUMMARY   = os.path.join(DATA_DIR, "summary.txt")
 RESUME = os.path.join(DATA_DIR, "resume.pdf")
 

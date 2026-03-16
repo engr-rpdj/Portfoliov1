@@ -19,8 +19,15 @@ CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR  = os.path.join(BASE_DIR, "..", "data")
 HTML_FILE = os.path.join(BASE_DIR, "..", "portfolio.html")
-LINKEDIN  = os.path.join(DATA_DIR, "linkedin.pdf")
 SUMMARY   = os.path.join(DATA_DIR, "summary.txt")
+RESUME = os.path.join(DATA_DIR, "resume.pdf")
+
+try:
+    resume_text = load_pdf(RESUME)
+    add_document(resume_text, "resume")
+    print("✓ resume.pdf indexed")
+except FileNotFoundError as e:
+    print(f"⚠ {e} — skipping")
 
 # ── App ──────────────────────────────────────────────────────
 app = FastAPI(title=f"{TWIN_NAME} — AI Digital Twin")
